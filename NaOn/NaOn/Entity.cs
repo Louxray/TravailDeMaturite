@@ -110,7 +110,7 @@ namespace NaOn
             foreach (Decor whichObject in decors)
             {
                 //test de collision avec le decor
-                if ((whichObject != null)   //verifie que l objet existe
+                if ((whichObject.typeOfDecor == 0)  //verifie que l objet est touchable
                     && ((this.Bottom + 5 > whichObject.Top) //test de collision
                     && (this.Bottom - 5 < whichObject.Top)
                     && (this.Left < whichObject.Right)
@@ -131,7 +131,7 @@ namespace NaOn
             foreach (Decor whichObject in decors)
             {
                 //test de collision avec le decor
-                if ((whichObject != null)   //verifie que l objet existe
+                if ((whichObject.typeOfDecor == 0)  //verifie que l objet est touchable
                     && ((this.Top + 5 > whichObject.Bottom) //test de collision
                     && (this.Top - 5 < whichObject.Bottom)
                     && (this.Left + 1 < whichObject.Right)
@@ -148,17 +148,17 @@ namespace NaOn
             foreach (Decor whichObject in decors)
             {
                 //test de collision avec le decor
-                if ((whichObject != null)   //verifie que l objet existe
-                && ((direction < 0) //test de collision selon le sens du perso
-                && ((this.Left + 2 > whichObject.Right)
-                && (this.Left - 2 < whichObject.Right)
-                && ((this.Top < whichObject.Bottom)
-                && (this.Bottom > whichObject.Top))))
-                || ((direction > 0)
-                && ((this.Right + 2 > whichObject.Left)
-                && (this.Right - 2 < whichObject.Left)
-                && ((this.Top < whichObject.Bottom)
-                && (this.Bottom > whichObject.Top)))))
+                if ((whichObject.typeOfDecor == 0)  //verifie que l objet est touchable
+                    && ((direction < 0) //test de collision selon le sens du perso
+                    && ((this.Left + 2 > whichObject.Right)
+                    && (this.Left - 5 < whichObject.Right)
+                    && ((this.Top < whichObject.Bottom)
+                    && (this.Bottom > whichObject.Top))))
+                    || ((direction > 0)
+                    && ((this.Right + 5 > whichObject.Left)
+                    && (this.Right - 2 < whichObject.Left)
+                    && ((this.Top < whichObject.Bottom)
+                    && (this.Bottom > whichObject.Top)))))
                 {
                     return true;
                 }

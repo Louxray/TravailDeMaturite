@@ -67,7 +67,7 @@ namespace NaOn
             //creation zones de decor
             for (int i = 0; i < 12; i++)
             {
-                decors.Add(new Decor((i - 2), (i < 5) ? (this.ClientSize.Height) : (200)));
+                decors.Add(new Decor((i - 2), (i < 5) ? (this.ClientSize.Height) : (this.ClientSize.Height - 100), 0));
                 this.Controls.Add(decors[i]);
             }
             player.Location = new Point(player.Left, decors[0].Top - player.Height);

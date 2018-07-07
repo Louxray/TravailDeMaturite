@@ -13,7 +13,7 @@ namespace NaOn
         {
             this.tag = "ennemi";
             this.race = raceGiven;
-            this.Image = Image.FromFile("./images/zombi/5.gif");
+            this.Image = Image.FromFile("./images/"+race+"/5.gif");
 
             //initialisation des donnes de base
             this.health[0] = 100;   //vie max = 100
