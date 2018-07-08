@@ -24,12 +24,9 @@ namespace NaOn
             this.tag = "player";
 
             this.CreateAttack(1, 25, 20, 5, "./images/attack/feu0.bmp");
-            this.listAttacks[0].Location = new Point(200, 200);
-            this.listAttacks[0].Visible = true;
-            this.listAttacks[0].Enabled = true;
         }
 
-        public void MovePlayer(List<Decor> decors)
+        public void MovePlayer(List<Decor> decors, Label label2, Form whichForm)
         {
             double indic = 0;  //indicateur droite/gauche  -1 = gauche, 1 = droite
 
@@ -53,6 +50,11 @@ namespace NaOn
                 indic += 1;    //vers la droite
             }
 
+            if ((Control.MouseButtons == MouseButtons.Left) && (this.listAttacks[0].useable == true))
+            {
+                this.listAttacks[0].ActivateAttack(this, whichForm.PointToClient(System.Windows.Forms.Cursor.Position));
+            }
+
             if ((Keyboard.IsKeyDown(Key.LeftShift) == true) && (this.CollisionSol(decors)))
             {
                 indic *= 1.7; //permet de courir
@@ -61,9 +63,11 @@ namespace NaOn
             this.MoveEntity(indic, decors);    //transmet la direction et la vitesse pour bouger le joueur
         }
 
+        /*
         public override bool TestMort(int formHeight)
         {
             return this.health[1] <= 0; //meurt si plus de pv
         }
+        */
     }
 }

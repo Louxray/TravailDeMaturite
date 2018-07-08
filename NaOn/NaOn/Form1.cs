@@ -13,7 +13,6 @@ namespace NaOn
 {
     public partial class Form1 : Form
     {
-        int test = 0;
         Heros player = new Heros(); //creation personnage
 
         List<Entity> goodOnes = new List<Entity>();
@@ -28,7 +27,7 @@ namespace NaOn
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //DoubleBuffered = true;
+            DoubleBuffered = true;
             
 
             //ajoute les persos ici
@@ -67,7 +66,7 @@ namespace NaOn
             //creation zones de decor
             for (int i = 0; i < 12; i++)
             {
-                decors.Add(new Decor((i - 2), (i < 5) ? (this.ClientSize.Height) : (this.ClientSize.Height - 100), 0));
+                decors.Add(new Decor((i - 2), (i < 5) ? (this.ClientSize.Height - 100) : (this.ClientSize.Height), 0));
                 this.Controls.Add(decors[i]);
             }
             player.Location = new Point(player.Left, decors[0].Top - player.Height);
@@ -75,14 +74,15 @@ namespace NaOn
 
         private void MoveEntities(object sender, EventArgs e)
         {
-            player.MovePlayer(decors);    //demarre le test des touches
+            player.MovePlayer(decors, label2, this);    //demarre le test des touches
             CollisionAttack();
-            label1.Text = player.health[1].ToString() + "/" + player.health[0].ToString();
             for (int i = 0; i < everybody.Count; i++)
             {
                 everybody[i].Gravity(decors);
+                everybody[i].Recover();
                 if (everybody[i].TestMort(this.ClientSize.Height))
                 {
+                    Controls.Remove(everybody[i]);
                     everybody.Remove(everybody[i]);
                     //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     //
@@ -93,28 +93,51 @@ namespace NaOn
             }
         }
 
-        protected void CollisionAttack()
+        private void CollisionAttack()
         {
-            foreach (Entity whichAlly in goodOnes)
+            foreach (Decor whichDecor in decors)
             {
-                foreach (Ennemy whichEnnemi in ennemis)
+                foreach (Entity whichAlly in goodOnes)
                 {
-                    foreach (Attack whichAttack in whichEnnemi.listAttacks)
+                    foreach (Ennemy whichEnnemi in ennemis)
                     {
-                        if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds)))
+                        foreach (Attack whichAttack in whichEnnemi.listAttacks)
                         {
-                            whichAlly.Wound(whichAttack.typeOfDamage, whichAttack.damage);
+                            if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds)))
+                            {
+                                whichAlly.Wound(whichAttack.typeOfDamage, whichAttack.damage);
+                            }
+                            if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds)))
+                            {
+                                whichAttack.DesactivateAttack();
+                            }
                         }
-                    }
-                    foreach (Attack whichAttack in whichAlly.listAttacks)
-                    {
-                        if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichEnnemi.Bounds)))
+                        foreach (Attack whichAttack in whichAlly.listAttacks)
                         {
-                            whichEnnemi.Wound(whichAttack.typeOfDamage, whichAttack.damage);
+                            if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichEnnemi.Bounds)))
+                            {
+                                whichEnnemi.Wound(whichAttack.typeOfDamage, whichAttack.damage);
+                            }
+                            if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds)))
+                            {
+                                whichAttack.DesactivateAttack();
+                            }
                         }
                     }
                 }
             }
+        }
+
+        private bool TestInGame()
+        {
+            if ((Control.MousePosition.X >= 0)
+                && (Control.MousePosition.X <= this.ClientSize.Width)
+                && (Control.MousePosition.Y >= 0)
+                && (Control.MousePosition.Y <= this.ClientSize.Height))
+            {
+                return true;
+            }
+            return false;
         }
 
         /*

@@ -14,6 +14,7 @@ namespace NaOn
             this.tag = "ennemi";
             this.race = raceGiven;
             this.Image = Image.FromFile("./images/"+race+"/5.gif");
+            this.Location = new Point(300, 0);
 
             //initialisation des donnes de base
             this.health[0] = 100;   //vie max = 100
@@ -22,8 +23,8 @@ namespace NaOn
             this.mana[1] = this.mana[0];    //mana actuelle = mana max
         }
 
+        //pour les ennemis de base, il y a 2 attaques, base et a distance
+
         private string race;
-
-
     }
 }

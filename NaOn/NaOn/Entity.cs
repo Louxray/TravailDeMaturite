@@ -13,9 +13,15 @@ namespace NaOn
         protected Entity()
         {
             ResetFallSpeed();   //cree l entite sans chute
+            injured = false;
+            immunity = 0;
         }
 
-        protected int direction = 0;
+        protected bool injured;
+
+        protected int immunity;
+
+        protected double direction = 0;
 
         //initialisation des caracteres d une entite
         public int[] health = new int[2];   //creation d un tableau pour la vie actuelle/max
@@ -37,23 +43,35 @@ namespace NaOn
 
         public void Wound(int typeOfDamage, int damage)
         {
-            this.health[1] -= damage;
+            if (!injured)
+            {
+                this.health[1] -= damage;
+                this.injured = true;
+                immunity = 50;
+            }
         }
 
+        public void Recover()
+        {
+            if (injured)
+            {
+                immunity -= 1;
+            }
+            if (immunity == 0)
+            {
+                injured = false;
+            }
+        }
 
+        protected void LaunchAttack(int whichAttackLaunch)
+        {
+
+        }
 
         protected void CreateAttack(int typeOfDamageGiven, int damageGiven, int coutGiven, int speedGiven, string pathOfImageGiven)
         {
-            listAttacks.Add(new Attack(typeOfDamageGiven, damageGiven, coutGiven, speedGiven, pathOfImageGiven));
-            DesactiveAttack(listAttacks.Count - 1);
-        }
-
-        protected void DesactiveAttack(int whichAttack)
-        {
-            listAttacks[whichAttack].Location = new Point(-200, -200);
-            listAttacks[whichAttack].Visible = false;
-            listAttacks[whichAttack].Enabled = false;
-
+            this.listAttacks.Add(new Attack(typeOfDamageGiven, damageGiven, coutGiven, speedGiven, pathOfImageGiven));
+            this.listAttacks[listAttacks.Count-1].DesactivateAttack();
         }
 
         private void ResetFallSpeed()
@@ -65,6 +83,10 @@ namespace NaOn
         {
             if (!CollisionMur(decors, X))
             {
+                if (X != 0)
+                {
+                    this.direction = X;
+                }
                 this.Location = new Point(this.Left + (int)(X * moveSpeed), this.Top); //permet de deplacer le perso de X, qui est combien la quantite de deplacement de l entite 
             }
         }
@@ -80,7 +102,7 @@ namespace NaOn
 
         private void GravityEffect()
         {
-            fallSpeed = fallSpeed + acceleration;   //prise de vitesse lors de la chute
+            this.fallSpeed = fallSpeed + acceleration;   //prise de vitesse lors de la chute
         }
 
         public void Gravity(List<Decor> decors)
@@ -89,7 +111,7 @@ namespace NaOn
             {
                 if ((CollisionToit(decors)) && (!CollisionMur(decors, 0)))
                 {
-                    fallSpeed = 2;  //si touche le plafond le perso retombe avec une vitesse initîale de 2pixels/0.001s
+                    this.fallSpeed = 2;  //si touche le plafond le perso retombe avec une vitesse initîale de 2pixels/0.001s
                 }
                 Fall();
             }
@@ -178,7 +200,7 @@ namespace NaOn
             return false;
         }
 
-        public virtual bool TestMort(int formHeight)
+        public /*virtual*/ bool TestMort(int formHeight)
         {
             return this.health[1] <= 0 || TestTombe(formHeight) ;   //test si le perso est mort
         }        
