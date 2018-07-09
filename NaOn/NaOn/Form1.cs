@@ -103,6 +103,10 @@ namespace NaOn
                     {
                         foreach (Attack whichAttack in whichEnnemi.listAttacks)
                         {
+                            if (whichAttack.Enabled)
+                            {
+                                whichAttack.MoveToTarget();
+                            }
                             if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds)))
                             {
                                 whichAlly.Wound(whichAttack.typeOfDamage, whichAttack.damage);
@@ -114,6 +118,10 @@ namespace NaOn
                         }
                         foreach (Attack whichAttack in whichAlly.listAttacks)
                         {
+                            if (whichAttack.Enabled)
+                            {
+                                whichAttack.MoveToTarget();
+                            }
                             if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichEnnemi.Bounds)))
                             {
                                 whichEnnemi.Wound(whichAttack.typeOfDamage, whichAttack.damage);

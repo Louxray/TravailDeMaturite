@@ -23,7 +23,7 @@ namespace NaOn
             this.Image = Image.FromFile("./images/heros/5.gif"); //charge l image d attente du heros
             this.tag = "player";
 
-            this.CreateAttack(1, 25, 20, 5, "./images/attack/feu0.bmp");
+            this.CreateAttack(1, 25, 20, 1.5, "./images/attack/feu0.bmp");
         }
 
         public void MovePlayer(List<Decor> decors, Label label2, Form whichForm)

@@ -68,7 +68,7 @@ namespace NaOn
 
         }
 
-        protected void CreateAttack(int typeOfDamageGiven, int damageGiven, int coutGiven, int speedGiven, string pathOfImageGiven)
+        protected void CreateAttack(int typeOfDamageGiven, int damageGiven, int coutGiven, double speedGiven, string pathOfImageGiven)
         {
             this.listAttacks.Add(new Attack(typeOfDamageGiven, damageGiven, coutGiven, speedGiven, pathOfImageGiven));
             this.listAttacks[listAttacks.Count-1].DesactivateAttack();
