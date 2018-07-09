@@ -15,6 +15,7 @@ namespace NaOn
     {
         Heros player = new Heros(); //creation personnage
 
+        List<Object> allObjects
         List<Entity> goodOnes = new List<Entity>();
         List<Ennemy> ennemis = new List<Ennemy>();
         List<Decor> decors = new List<Decor>();
@@ -29,7 +30,6 @@ namespace NaOn
         {
             DoubleBuffered = true;
             
-
             //ajoute les persos ici
             goodOnes.Add(player);
             Ennemy lol = new Ennemy("zombie");
@@ -57,8 +57,10 @@ namespace NaOn
             }
 
             //parametres de base de la fenetre
-            this.ClientSize = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2));
-            this.Location = new Point((int)(Screen.PrimaryScreen.Bounds.Width / 6), (int)(Screen.PrimaryScreen.Bounds.Height / 4));   //position de la fenetre sur l ecran
+
+            Size visiondimension = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2));
+            this.ClientSize = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 1.5));
+            this.Location = new Point((int)(Screen.PrimaryScreen.Bounds.Width / 6), (int)(Screen.PrimaryScreen.Bounds.Height / 6));   //position de la fenetre sur l ecran
             this.MaximumSize = this.ClientSize; //bloque la taille max de la fenetre
             this.MinimumSize = this.ClientSize; //bloque la taille min de la fenetre
             this.MaximizeBox = false;   //empeche le plein ecran
@@ -66,15 +68,17 @@ namespace NaOn
             //creation zones de decor
             for (int i = 0; i < 12; i++)
             {
-                decors.Add(new Decor((i - 2), (i < 5) ? (this.ClientSize.Height - 100) : (this.ClientSize.Height), 0));
+                decors.Add(new Decor((i - 2), (i < 5) ? (this.ClientSize.Height) : (this.ClientSize.Height - 100), 0));
                 this.Controls.Add(decors[i]);
             }
             player.Location = new Point(player.Left, decors[0].Top - player.Height);
+            this.Left -= 20;
+
         }   
 
         private void MoveEntities(object sender, EventArgs e)
         {
-            player.MovePlayer(decors, label2, this);    //demarre le test des touches
+            player.MovePlayer(decors, this);    //demarre le test des touches
             CollisionAttack();
             for (int i = 0; i < everybody.Count; i++)
             {
@@ -135,7 +139,7 @@ namespace NaOn
                 }
             }
         }
-
+            
         private bool TestInGame()
         {
             if ((Control.MousePosition.X >= 0)
@@ -146,6 +150,21 @@ namespace NaOn
                 return true;
             }
             return false;
+        }
+
+        private void cooldowns_Tick(object sender, EventArgs e)
+        {
+            label1.Text = (player.listAttacks[0].timeRemainingCD/ 10.0).ToString();
+            foreach (Entity who in everybody)
+            {
+                foreach (Attack whichAttack in who.listAttacks)
+                {
+                    if (whichAttack.timeRemainingCD > 0)
+                    {
+                        whichAttack.LowerCD();
+                    }
+                }
+            }
         }
 
         /*

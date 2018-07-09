@@ -23,10 +23,10 @@ namespace NaOn
             this.Image = Image.FromFile("./images/heros/5.gif"); //charge l image d attente du heros
             this.tag = "player";
 
-            this.CreateAttack(1, 25, 20, 1.5, "./images/attack/feu0.bmp");
+            this.CreateAttack(1, 45, 20, 30, 6.0, "./images/attack/feu0.bmp");
         }
 
-        public void MovePlayer(List<Decor> decors, Label label2, Form whichForm)
+        public void MovePlayer(List<Decor> decors, Form whichForm)
         {
             double indic = 0;  //indicateur droite/gauche  -1 = gauche, 1 = droite
 
@@ -50,7 +50,7 @@ namespace NaOn
                 indic += 1;    //vers la droite
             }
 
-            if ((Control.MouseButtons == MouseButtons.Left) && (this.listAttacks[0].useable == true))
+            if ((Control.MouseButtons == MouseButtons.Left) && (this.listAttacks[0].timeRemainingCD == 0))
             {
                 this.listAttacks[0].ActivateAttack(this, whichForm.PointToClient(System.Windows.Forms.Cursor.Position));
             }

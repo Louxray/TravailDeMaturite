@@ -14,13 +14,16 @@ namespace NaOn
         public int typeOfDamage { get; private set; }   //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
         public int damage { get; private set; }
         public bool useable { get; private set; }
+        public int timeRemainingCD { get; private set; }
+        public int cooldown { get; private set; }
         public int cout { get; private set; }
         public double speed { get; private set; }
         private string pathOfImage;
         private Point target;
         private double[] direction;
+        private int attackOrNot;
 
-        public Attack(int typeOfDamageGiven, int damageGiven, int coutGiven, double speedGiven, string pathOfImageGiven)
+        public Attack(int typeOfDamageGiven, int damageGiven, int coutGiven, int cooldownGiven, double speedGiven, string pathOfImageGiven)
         {
             this.tag = "attack";
             this.typeOfDamage = typeOfDamageGiven;
@@ -30,8 +33,10 @@ namespace NaOn
             this.pathOfImage = pathOfImageGiven;
             this.Image = Image.FromFile(pathOfImage);
             this.Location = new Point();
-            this.useable = true;
+            //this.useable = true;
             this.direction = new double[2] { 0, 0 };
+            this.cooldown = cooldownGiven;
+            this.timeRemainingCD = 0;
         }
 
         public void Aim(Point targetGiven)
@@ -41,9 +46,13 @@ namespace NaOn
 
         public void MoveToTarget()
         {
-            this.Location = new Point(
-                (int)(this.Location.X + direction[0] * this.speed),
-                (int)(this.Location.Y + direction[1] * this.speed));
+            attackOrNot = (attackOrNot < 3) ? (attackOrNot+1) : (0);
+            if (attackOrNot == 0)
+            {
+                this.Location = new Point(
+                    (int)(this.Location.X + (direction[0] * this.speed)),
+                    (int)(this.Location.Y + (direction[1] * this.speed)));
+            }
         }
 
         public void ActivateAttack(Entity who, Point aim)
@@ -80,10 +89,10 @@ namespace NaOn
                 (int)(who.Location.Y + (who.Width - this.Width) / 2.0 + direction[1] * 20.0));
             this.Visible = true;
             this.Enabled = true;
-            this.useable = false;
-        }
-
-        
+            //this.useable = false;
+            this.attackOrNot = 0;
+            this.timeRemainingCD = this.cooldown;
+        }        
 
         public void DesactivateAttack()
         {
@@ -92,7 +101,12 @@ namespace NaOn
             this.Location = new Point(-200, -200);
             this.Visible = false;
             this.Enabled = false;
-            this.useable = true;
+            //this.useable = true;
+        }
+
+        public void LowerCD()
+        {
+            this.timeRemainingCD -= 1;
         }
     }
 }

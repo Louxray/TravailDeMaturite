@@ -18,6 +18,6 @@ namespace NaOn
             this.typeOfDecor = typeOfDecorGiven;
         }
 
-        public int typeOfDecor;  //0
+        public int typeOfDecor;  //0 = dur, 1= gravity, 2 = nothing
     }
 }

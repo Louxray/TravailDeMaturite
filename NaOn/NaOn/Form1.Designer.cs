@@ -32,6 +32,7 @@
             this.movements = new System.Windows.Forms.Timer(this.components);
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.cooldowns = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // movements
@@ -43,8 +44,8 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(66, 115);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F);
+            this.label1.Location = new System.Drawing.Point(33, 46);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(86, 31);
             this.label1.TabIndex = 0;
@@ -54,11 +55,17 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(60, 38);
+            this.label2.Location = new System.Drawing.Point(175, 46);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(86, 31);
             this.label2.TabIndex = 1;
             this.label2.Text = "label2";
+            this.label2.Visible = false;
+            // 
+            // cooldowns
+            // 
+            this.cooldowns.Enabled = true;
+            this.cooldowns.Tick += new System.EventHandler(this.cooldowns_Tick);
             // 
             // Form1
             // 
@@ -77,6 +84,7 @@
         private System.Windows.Forms.Timer movements;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Timer cooldowns;
     }
 }
 

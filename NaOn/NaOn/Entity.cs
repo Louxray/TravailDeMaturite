@@ -63,14 +63,9 @@ namespace NaOn
             }
         }
 
-        protected void LaunchAttack(int whichAttackLaunch)
+        protected void CreateAttack(int typeOfDamageGiven, int damageGiven, int coutGiven, int cooldownGiven, double speedGiven, string pathOfImageGiven)
         {
-
-        }
-
-        protected void CreateAttack(int typeOfDamageGiven, int damageGiven, int coutGiven, double speedGiven, string pathOfImageGiven)
-        {
-            this.listAttacks.Add(new Attack(typeOfDamageGiven, damageGiven, coutGiven, speedGiven, pathOfImageGiven));
+            this.listAttacks.Add(new Attack(typeOfDamageGiven, damageGiven, coutGiven, cooldownGiven, speedGiven, pathOfImageGiven));
             this.listAttacks[listAttacks.Count-1].DesactivateAttack();
         }
 
