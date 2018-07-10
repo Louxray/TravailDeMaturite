@@ -14,8 +14,8 @@ namespace NaOn
     public partial class Form1 : Form
     {
         Heros player = new Heros(); //creation personnage
-
-        List<Object> allObjects
+        Salle[,] dungeon = new Salle[4,4];
+        List<Object> allObjects;
         List<Entity> goodOnes = new List<Entity>();
         List<Ennemy> ennemis = new List<Ennemy>();
         List<Decor> decors = new List<Decor>();
