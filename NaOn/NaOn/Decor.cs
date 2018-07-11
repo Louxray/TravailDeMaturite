@@ -17,7 +17,7 @@ namespace NaOn
             this.Location = new Point(coordX * this.Width, coordY - this.Height);   //positionne aux coordonnes voulues
             this.typeOfDecor = typeOfDecorGiven;
         }
-
+        
         public int typeOfDecor;  //0 = dur, 1= gravity, 2 = nothing
     }
 }
