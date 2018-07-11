@@ -14,17 +14,17 @@ namespace NaOn
 {
     public partial class Form1 : Form
     {
-        const int MAZE_WIDTH = 4;
-        const int MAZE_HEIGHT = 4;
+        const int MAZE_WIDTH = 4;  //largeur du donjon (=dj) (labyrinthe)
+        const int MAZE_HEIGHT = 4; //hauteur du donjon (=dj) (labyrinthe)
         Heros player = new Heros(); //creation personnage
-        Room[,] dungeon = new Room[MAZE_HEIGHT, MAZE_WIDTH];
-        Point whichPosition = new Point(0,0);
+        Room[,] dungeon = new Room[MAZE_HEIGHT, MAZE_WIDTH];    //creation du dj selon les dimension
+        Point whichPosition = new Point(0,0);   //localisation dans le dj
         //List<Object> allObjects;
         List<Entity> goodOnes = new List<Entity>();
         List<Ennemy> ennemis = new List<Ennemy>();
         List<Decor> decors = new List<Decor>();
         List<Entity> everybody = new List<Entity>();
-        int[,] visiondimension = new int[2, 2] { { (int)(Screen.PrimaryScreen.Bounds.Width / 6), (int)(Screen.PrimaryScreen.Bounds.Height / 4) }, { (int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2) } };
+        int[,] visiondimension = new int[2, 2];
 
         public Form1()
         {
@@ -37,6 +37,8 @@ namespace NaOn
             
             //ajoute les persos ici
             goodOnes.Add(player);
+            player.Left = 200;
+            player.Top = 200;
             Ennemy lol = new Ennemy("zombie");
             ennemis.Add(lol);
 
@@ -63,15 +65,17 @@ namespace NaOn
 
             //parametres de base de la fenetre
 
-            this.ClientSize = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 1.5));
-            this.Location = new Point((int)(Screen.PrimaryScreen.Bounds.Width / 6), (int)(Screen.PrimaryScreen.Bounds.Height / 6));   //position de la fenetre sur l ecran
+            this.ClientSize = new Size((int)(840), (int)(600));
+            this.Location = new Point((int)((Screen.PrimaryScreen.Bounds.Width - this.ClientSize.Width) / 2), (int)((Screen.PrimaryScreen.Bounds.Height - this.ClientSize.Height) / 2));    //position de la fenetre sur l ecran
             this.MaximumSize = this.ClientSize; //bloque la taille max de la fenetre
             this.MinimumSize = this.ClientSize; //bloque la taille min de la fenetre
             this.MaximizeBox = false;   //empeche le plein ecran
+            
+            //visiondimension =  { { (int)(Screen.PrimaryScreen.Bounds.Width / 6), (int)(Screen.PrimaryScreen.Bounds.Height / 4) }, { (int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2) } };
 
             //creation zones de decor
             CreateMaze();
-            player.Location = new Point(player.Left, dungeon[whichPosition.Y, whichPosition.X].decorsInRoom[0].Top - player.Height);
+            player.Location = new Point(200, 200);
             this.Left -= 20;
 
         }   
@@ -79,7 +83,6 @@ namespace NaOn
         private void MoveEntities(object sender, EventArgs e)
         {
             player.MovePlayer(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom, this);    //demarre le test des touches
-            CollisionAttack();
             for (int i = 0; i < everybody.Count; i++)
             {
                 everybody[i].Gravity(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom);
@@ -155,6 +158,7 @@ namespace NaOn
         private void cooldowns_Tick(object sender, EventArgs e)
         {
             label1.Text = (player.listAttacks[0].timeRemainingCD/ 10.0).ToString();
+            CollisionAttack();
             foreach (Entity who in everybody)
             {
                 foreach (Attack whichAttack in who.listAttacks)
@@ -347,6 +351,11 @@ namespace NaOn
         public void EnterTheRoom()
         {
             this.Controls.AddRange(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom.ToArray());
+        }
+
+        private void attacksTimer_Tick(object sender, EventArgs e)
+        {
+
         }
     }
 }

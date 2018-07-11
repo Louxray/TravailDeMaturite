@@ -14,7 +14,7 @@ namespace NaOn
         {
             this.tag = "decor";
             this.Image = Image.FromFile("./images/decor/sol/ecole.bmp");    //charge le skin de test
-            this.Location = new Point(coordX * this.Width, coordY - this.Height);   //positionne aux coordonnes voulues
+            this.Location = new Point(coordX * this.Width, coordY * this.Height);   //positionne aux coordonnes voulues
             this.typeOfDecor = typeOfDecorGiven;
         }
         

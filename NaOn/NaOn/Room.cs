@@ -15,16 +15,16 @@ namespace NaOn
 
         public Room(int[,] dimension)
         {            
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < 10; i++)
             {
-                this.decorsInRoom.Add(new Decor((i - 2), (i < 5) ? (dimension[1, 1]) : (dimension[1, 1] - 100), 0));
+                for (int j = 0; j < 14; j++)
+                {
+                    if ((j == 0) || (i == 0) || (j == 13) || (i == 9))
+                    {
+                        this.decorsInRoom.Add(new Decor(j, i, 0));
+                    }
+                }
             }
-            /*
-            for (int i = 0; i < Room.NBR_DOOR; i++)
-            {
-                this.doors.Add(i);
-            }
-            */
         }
 
         public void AddDoor(int whichDoor)

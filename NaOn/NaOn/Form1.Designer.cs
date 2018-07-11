@@ -32,7 +32,7 @@
             this.movements = new System.Windows.Forms.Timer(this.components);
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.cooldowns = new System.Windows.Forms.Timer(this.components);
+            this.attacksTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // movements
@@ -62,10 +62,10 @@
             this.label2.Text = "label2";
             this.label2.Visible = false;
             // 
-            // cooldowns
+            // attacksTimer
             // 
-            this.cooldowns.Enabled = true;
-            this.cooldowns.Tick += new System.EventHandler(this.cooldowns_Tick);
+            this.attacksTimer.Enabled = true;
+            this.attacksTimer.Tick += new System.EventHandler(this.attacksTimer_Tick);
             // 
             // Form1
             // 
@@ -84,7 +84,7 @@
         private System.Windows.Forms.Timer movements;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Timer cooldowns;
+        private System.Windows.Forms.Timer attacksTimer;
     }
 }
 
