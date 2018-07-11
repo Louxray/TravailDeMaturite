@@ -65,7 +65,7 @@
             // attacksTimer
             // 
             this.attacksTimer.Enabled = true;
-            this.attacksTimer.Tick += new System.EventHandler(this.attacksTimer_Tick);
+            this.attacksTimer.Tick += new System.EventHandler(this.cooldowns_Tick);
             // 
             // Form1
             // 

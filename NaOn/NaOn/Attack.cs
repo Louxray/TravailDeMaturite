@@ -13,7 +13,6 @@ namespace NaOn
         //type des degats pour faiblesse/resistances
         public int typeOfDamage { get; private set; }   //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
         public int damage { get; private set; }
-        public bool useable { get; private set; }
         public int timeRemainingCD { get; private set; }
         public int cooldown { get; private set; }
         public int cout { get; private set; }
@@ -33,7 +32,6 @@ namespace NaOn
             this.pathOfImage = pathOfImageGiven;
             this.Image = Image.FromFile(pathOfImage);
             this.Location = new Point();
-            //this.useable = true;
             this.direction = new double[2] { 0, 0 };
             this.cooldown = cooldownGiven;
             this.timeRemainingCD = 0;
@@ -46,7 +44,7 @@ namespace NaOn
 
         public void MoveToTarget()
         {
-            attackOrNot = (attackOrNot < 3) ? (attackOrNot+1) : (0);
+            attackOrNot = (attackOrNot < 20) ? (attackOrNot+1) : (0);
             if (attackOrNot == 0)
             {
                 this.Location = new Point(
@@ -62,26 +60,26 @@ namespace NaOn
             {
                 if ((who.Location.X + (who.Width / 2.0) - aim.X) <= 0)
                 {
-                    this.direction[0] = (Math.Cos(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X))));
-                    this.direction[1] = (-Math.Sin(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X))));
+                    this.direction[0] = (Math.Cos(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y - (this.Width / 2.0)) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X - (this.Width / 2.0)))));
+                    this.direction[1] = (-Math.Sin(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y - (this.Width / 2.0)) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X - (this.Width / 2.0)))));
                 }
                 else
                 {
-                    this.direction[0] = (-Math.Cos(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X))));
-                    this.direction[1] = (-Math.Sin(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X))));
+                    this.direction[0] = (-Math.Cos(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y - (this.Width / 2.0)) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X - (this.Width / 2.0)))));
+                    this.direction[1] = (-Math.Sin(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y - (this.Width / 2.0)) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X - (this.Width / 2.0)))));
                 }
             }
             else
             {
                 if ((who.Location.X + (who.Width / 2.0) - aim.X) <= 0)
                 {
-                    this.direction[0] = (Math.Cos(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X))));
+                    this.direction[0] = (Math.Cos(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y - (this.Width / 2.0)) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X - (this.Width / 2.0)))));
                     this.direction[1] = (Math.Sin(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X))));
                 }
                 else
                 {
-                    this.direction[0] = (-Math.Cos(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X))));
-                    this.direction[1] = (Math.Sin(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X))));
+                    this.direction[0] = (-Math.Cos(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y - (this.Width / 2.0)) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X - (this.Width / 2.0)))));
+                    this.direction[1] = (Math.Sin(Math.Atan(Math.Abs(who.Location.Y + (who.Width / 2.0) - aim.Y - (this.Width / 2.0)) / Math.Abs(who.Location.X + (who.Width / 2.0) - aim.X - (this.Width / 2.0)))));
                 }
             }
             this.Location = new Point(
@@ -89,7 +87,6 @@ namespace NaOn
                 (int)(who.Location.Y + (who.Width - this.Width) / 2.0 + direction[1] * 20.0));
             this.Visible = true;
             this.Enabled = true;
-            //this.useable = false;
             this.attackOrNot = 0;
             this.timeRemainingCD = this.cooldown;
         }        
@@ -101,7 +98,6 @@ namespace NaOn
             this.Location = new Point(-200, -200);
             this.Visible = false;
             this.Enabled = false;
-            //this.useable = true;
         }
 
         public void LowerCD()

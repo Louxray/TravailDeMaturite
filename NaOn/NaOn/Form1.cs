@@ -65,7 +65,10 @@ namespace NaOn
 
             //parametres de base de la fenetre
 
+
             this.ClientSize = new Size((int)(840), (int)(600));
+            Size visiondimension = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2));
+            this.ClientSize = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 1.5));
             this.Location = new Point((int)((Screen.PrimaryScreen.Bounds.Width - this.ClientSize.Width) / 2), (int)((Screen.PrimaryScreen.Bounds.Height - this.ClientSize.Height) / 2));    //position de la fenetre sur l ecran
             this.MaximumSize = this.ClientSize; //bloque la taille max de la fenetre
             this.MinimumSize = this.ClientSize; //bloque la taille min de la fenetre
@@ -83,6 +86,7 @@ namespace NaOn
         private void MoveEntities(object sender, EventArgs e)
         {
             player.MovePlayer(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom, this);    //demarre le test des touches
+            CollisionAttack();
             for (int i = 0; i < everybody.Count; i++)
             {
                 everybody[i].Gravity(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom);
@@ -100,6 +104,21 @@ namespace NaOn
             }
         }
 
+        private void cooldowns_Tick(object sender, EventArgs e)
+        {
+            label1.Text = (player.listAttacks[0].timeRemainingCD / 10.0).ToString();
+            foreach (Entity who in everybody)
+            {
+                foreach (Attack whichAttack in who.listAttacks)
+                {
+                    if (whichAttack.timeRemainingCD > 0)
+                    {
+                        whichAttack.LowerCD();
+                    }
+                }
+            }
+        }
+
         private void CollisionAttack()
         {
             foreach (Decor whichDecor in dungeon[whichPosition.Y, whichPosition.X].decorsInRoom)
@@ -112,7 +131,7 @@ namespace NaOn
                         {
                             if (whichAttack.Enabled)
                             {
-                                whichAttack.MoveToTarget();
+                                //whichAttack.MoveToTarget();
                             }
                             if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds)))
                             {
@@ -142,34 +161,6 @@ namespace NaOn
                 }
             }
         }
-            
-        private bool TestInGame()
-        {
-            if ((Control.MousePosition.X >= 0)
-                && (Control.MousePosition.X <= this.ClientSize.Width)
-                && (Control.MousePosition.Y >= 0)
-                && (Control.MousePosition.Y <= this.ClientSize.Height))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private void cooldowns_Tick(object sender, EventArgs e)
-        {
-            label1.Text = (player.listAttacks[0].timeRemainingCD/ 10.0).ToString();
-            CollisionAttack();
-            foreach (Entity who in everybody)
-            {
-                foreach (Attack whichAttack in who.listAttacks)
-                {
-                    if (whichAttack.timeRemainingCD > 0)
-                    {
-                        whichAttack.LowerCD();
-                    }
-                }
-            }
-        }
 
         private void CreateMaze()
         {
@@ -180,11 +171,11 @@ namespace NaOn
             whichPosition = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
             alreadyVisited.Add(whichPosition);
             int whichRoom = -1;
-            for (int i = 0; i < dungeon.GetUpperBound(0) + 1; i++)
-            {
-                for (int j = 0; j < dungeon.GetUpperBound(1) + 1; j++)
+            for (int i = 0; i<dungeon.GetUpperBound(0) + 1; i++)
+           {
+                for (int j = 0; j<dungeon.GetUpperBound(1) + 1; j++)
                 {
-                    dungeon[i, j] = new Room(visiondimension);
+                   dungeon[i, j] = new Room(visiondimension);
                     /*
                     if (i == 0)
                     {
@@ -212,7 +203,7 @@ namespace NaOn
             {
                 if (!Surrounded())
                 {
-                    for (int i = 0; i < Room.NBR_DOOR; i++)
+                    for (int i = 0; i<Room.NBR_DOOR; i++)
                     {
                         availableRooms.Add(i);
                     }
@@ -229,7 +220,7 @@ namespace NaOn
                         availableRooms.Remove(2);
                     }
                     if (Surrounded(3))
-                    {
+                   {
                         availableRooms.Remove(3);
                     }
                     whichRoom = availableRooms[rdm.Next(0, availableRooms.Count)];
@@ -286,9 +277,9 @@ namespace NaOn
 
         private bool MazeFinished()
         {
-            for (int i = 0; i < dungeon.GetUpperBound(0) + 1; i++)
+            for (int i = 0; i<dungeon.GetUpperBound(0) + 1; i++)
             {
-                for (int j = 0; j < dungeon.GetUpperBound(1) + 1; j++)
+                for (int j = 0; j<dungeon.GetUpperBound(1) + 1; j++)
                 {
                     if (!dungeon[i, j].visited)
                     {
@@ -352,10 +343,17 @@ namespace NaOn
         {
             this.Controls.AddRange(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom.ToArray());
         }
-
-        private void attacksTimer_Tick(object sender, EventArgs e)
+            
+        private bool TestInGame()
         {
-
-        }
+            if ((Control.MousePosition.X >= 0)
+                && (Control.MousePosition.X <= this.ClientSize.Width)
+                && (Control.MousePosition.Y >= 0)
+                && (Control.MousePosition.Y <= this.ClientSize.Height))
+            {
+                return true;
+            }
+            return false;
+        }    
     }
 }
