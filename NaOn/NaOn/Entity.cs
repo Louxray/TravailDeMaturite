@@ -90,7 +90,7 @@ namespace NaOn
         {
             if ((!CollisionToit(decors)) && (CollisionSol(decors)))
             {
-                this.fallSpeed = -7.0;  //vitesse d un saut 
+                this.fallSpeed = -8.0;  //vitesse d un saut 
                 Fall(); //fait tomber
             }
         }
@@ -127,13 +127,13 @@ namespace NaOn
             foreach (Decor whichObject in decors)
             {
                 //test de collision avec le decor
-                if ((whichObject.typeOfDecor == 0)  //verifie que l objet est touchable
-                    && ((this.Bottom + 5 > whichObject.Top) //test de collision
-                    && (this.Bottom - 5 < whichObject.Top)
+                if (/*(whichObject.whichDecor == 0)  //verifie que l objet est touchable
+                    && */((this.Bottom + 7 > whichObject.Top) //test de collision
+                    && (this.Bottom - 7 < whichObject.Top)
                     && (this.Left < whichObject.Right)
                     && (this.Right > whichObject.Left)))
                 {
-                    if (Math.Abs(this.Bottom - whichObject.Top) < 5)
+                    if (Math.Abs(this.Bottom - whichObject.Top) < 7)
                     {
                         this.Location = new Point(this.Left, whichObject.Top - this.Height);    //colle le perso au sol s il ne le touche pas tout a fait
                     }
@@ -148,7 +148,7 @@ namespace NaOn
             foreach (Decor whichObject in decors)
             {
                 //test de collision avec le decor
-                if ((whichObject.typeOfDecor == 0)  //verifie que l objet est touchable
+                if ((whichObject.whichDecor == 0)  //verifie que l objet est touchable
                     && ((this.Top + 5 > whichObject.Bottom) //test de collision
                     && (this.Top - 5 < whichObject.Bottom)
                     && (this.Left + 1 < whichObject.Right)
@@ -165,8 +165,8 @@ namespace NaOn
             foreach (Decor whichObject in decors)
             {
                 //test de collision avec le decor
-                if ((whichObject.typeOfDecor == 0)  //verifie que l objet est touchable
-                    && ((direction < 0) //test de collision selon le sens du perso
+                if ((whichObject.whichDecor == 0)  //verifie que l objet est touchable
+                    && (((direction < 0) //test de collision selon le sens du perso
                     && ((this.Left + 2 > whichObject.Right)
                     && (this.Left - 5 < whichObject.Right)
                     && ((this.Top < whichObject.Bottom)
@@ -175,7 +175,7 @@ namespace NaOn
                     && ((this.Right + 5 > whichObject.Left)
                     && (this.Right - 2 < whichObject.Left)
                     && ((this.Top < whichObject.Bottom)
-                    && (this.Bottom > whichObject.Top)))))
+                    && (this.Bottom > whichObject.Top))))))
                 {
                     return true;
                 }

@@ -78,7 +78,7 @@ namespace NaOn
 
             //creation zones de decor
             CreateMaze();
-            player.Location = new Point(600, 200);
+            player.Location = new Point(70, 200);
             this.Left -= 20;
 
         }   
@@ -131,7 +131,7 @@ namespace NaOn
                         {
                             if (whichAttack.Enabled)
                             {
-                                //whichAttack.MoveToTarget();
+                                whichAttack.MoveToTarget();
                             }
                             if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds)))
                             {

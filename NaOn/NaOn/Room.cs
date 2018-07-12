@@ -26,7 +26,7 @@ namespace NaOn
                 {
                     if ((j == 0) || (i == 0) || (j == 13))
                     {
-                        this.decorsInRoom.Add(new Decor(j, i, 0));
+                        this.decorsInRoom.Add(new Decor(j, i, 0, 0));
                     }
                 }
             }
@@ -57,7 +57,7 @@ namespace NaOn
                 {
                     if ((platforms[i, j] == true) && ((j < NBR_PLATFORM - 1) && (Surrounded(2, new Point(i, j)))))
                     {
-                        this.decorsInRoom.Add(new Decor(j + 1, i + 1, 0));
+                        this.decorsInRoom.Add(new Decor(j, i, 1, 0));
                         switch (rdm.Next(0, 2))
                         {
                             case 0:
@@ -84,7 +84,7 @@ namespace NaOn
                     }
                     else if ((platforms[i, j] == true) && ((j == NBR_PLATFORM - 1) || ((j < NBR_PLATFORM - 1) && (Surrounded(1, new Point(i, j))))))
                     {
-                        this.decorsInRoom.Add(new Decor(j + 1, i + 1, 0));
+                        this.decorsInRoom.Add(new Decor(j, i, 1, 0));
                     }
                 }
             }
