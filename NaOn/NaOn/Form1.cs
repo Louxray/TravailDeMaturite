@@ -68,7 +68,7 @@ namespace NaOn
 
             this.ClientSize = new Size((int)(840), (int)(600));
             Size visiondimension = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2));
-            this.ClientSize = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 1.5));
+            //this.ClientSize = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 1.5));
             this.Location = new Point((int)((Screen.PrimaryScreen.Bounds.Width - this.ClientSize.Width) / 2), (int)((Screen.PrimaryScreen.Bounds.Height - this.ClientSize.Height) / 2));    //position de la fenetre sur l ecran
             this.MaximumSize = this.ClientSize; //bloque la taille max de la fenetre
             this.MinimumSize = this.ClientSize; //bloque la taille min de la fenetre
@@ -78,7 +78,7 @@ namespace NaOn
 
             //creation zones de decor
             CreateMaze();
-            player.Location = new Point(200, 200);
+            player.Location = new Point(600, 200);
             this.Left -= 20;
 
         }   
@@ -176,24 +176,6 @@ namespace NaOn
                 for (int j = 0; j<dungeon.GetUpperBound(1) + 1; j++)
                 {
                    dungeon[i, j] = new Room(visiondimension);
-                    /*
-                    if (i == 0)
-                    {
-                        dungeon[i, j].RemoveDoor(0);
-                    }
-                    if (j == 0)
-                    {
-                        dungeon[i, j].RemoveDoor(3);
-                    }
-                    if (i == dungeon.GetUpperBound(0))
-                    {
-                        dungeon[i, j].RemoveDoor(2);
-                    }
-                    if (j == dungeon.GetUpperBound(1))
-                    {
-                        dungeon[i, j].RemoveDoor(1);
-                    }
-                    */
                     //test[i, j] = 0;
                 }
             }
