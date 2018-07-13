@@ -10,7 +10,7 @@ namespace NaOn
 {
     class Decor : Object
     {
-        public int whichDecor; //0 = mur, 1 = platform
+        public int whichDecor; //0 = mur, 1 = platform, 2 = porte
         public int typeOfDecor { get; private set; }    //0 = dur, 1= gravity, 2 = nothing
 
         public Decor(int coordX, int coordY, int whichDecorGiven, int typeOfDecorGiven)

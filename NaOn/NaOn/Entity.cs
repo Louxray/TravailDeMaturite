@@ -90,7 +90,7 @@ namespace NaOn
         {
             if ((!CollisionToit(decors)) && (CollisionSol(decors)))
             {
-                this.fallSpeed = -8.0;  //vitesse d un saut 
+                this.fallSpeed = -7.5;  //vitesse d un saut 
                 Fall(); //fait tomber
             }
         }

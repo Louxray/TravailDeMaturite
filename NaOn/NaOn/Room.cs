@@ -11,6 +11,7 @@ namespace NaOn
     {
         public static readonly int NBR_DOOR  = 4;
         public static readonly int NBR_PLATFORM = 4;
+        private int typeOfRoom;
         private bool[,] platforms = new bool[NBR_PLATFORM, NBR_PLATFORM];
         public bool visited { get; private set; } = false;
         public List<int> doors = new List<int>(); //0 = up, 1 = right, 2 = down, 3 = left
@@ -20,6 +21,7 @@ namespace NaOn
         {
             int[] shortest = new int[] { -10, -10, -10, -10 };
             Random rdm = new Random();
+            typeOfRoom = rdm.Next(0, 3);
             for (int i = 0; i < 10; i++)
             {
                 for (int j = 0; j < 14; j++)
@@ -28,65 +30,77 @@ namespace NaOn
                     {
                         this.decorsInRoom.Add(new Decor(j, i, 0, 0));
                     }
-                }
-            }
-            for (int j = 0; j < NBR_PLATFORM; j++)
-            {
-                for (int i = 0; i < NBR_PLATFORM; i++)
-                {
-                    if (rdm.Next(0, 2) == 0)
+                    if ((typeOfRoom != 0) && (i == 9))
                     {
-                        if ((j == 0) || ((j > 0) && (Surrounded(0, new Point(i, j)))))
+                        this.decorsInRoom.Add(new Decor(j, i, 0, 0));
+                        for (int k = 0; k <NBR_PLATFORM; k++)
                         {
-                            platforms[i, j] = true;
-                            shortest[j] = i;
+                            this.decorsInRoom.Add(new Decor(k, (k%3 == 0) ? 2 : 1, 1, 0));
                         }
-                    }
-                    if ((i == NBR_PLATFORM - 1) && (shortest[j] == -10))
-                    {
-                        platforms[NBR_PLATFORM - 2, j] = true;
-                        shortest[j] = NBR_PLATFORM - 2;
-                        platforms[1, j] = true;
-                        shortest[j] = 1;
                     }
                 }
             }
-            for (int j = 0; j < NBR_PLATFORM; j++)
+            if (typeOfRoom == 0)
             {
-                for (int i = 0; i < NBR_PLATFORM; i++)
+                for (int j = 0; j < NBR_PLATFORM; j++)
                 {
-                    if ((platforms[i, j] == true) && ((j < NBR_PLATFORM - 1) && (Surrounded(2, new Point(i, j)))))
+                    for (int i = 0; i < NBR_PLATFORM; i++)
                     {
-                        this.decorsInRoom.Add(new Decor(j, i, 1, 0));
-                        switch (rdm.Next(0, 2))
+                        if (rdm.Next(0, 2) == 0)
                         {
-                            case 0:
-                                if (i > 0)
-                                {
-                                    platforms[i - 1, j + 1] = true;
-                                }
-                                else
-                                {
-                                    platforms[i + 1, j + 1] = true;
-                                }
-                                break;
-                            case 1:
-                                if (i > 0)
-                                {
-                                    platforms[i - 1, j] = true;
-                                }
-                                else
-                                {
-                                    platforms[i + 1, j] = true;
-                                }
-                                break;
+                            if ((j == 0) || ((j > 0) && (Surrounded(0, new Point(i, j)))))
+                            {
+                                platforms[i, j] = true;
+                                shortest[j] = i;
+                            }
+                        }
+                        if ((i == NBR_PLATFORM - 1) && (shortest[j] == -10))
+                        {
+                            platforms[NBR_PLATFORM - 2, j] = true;
+                            shortest[j] = NBR_PLATFORM - 2;
+                            platforms[1, j] = true;
+                            shortest[j] = 1;
                         }
                     }
-                    else if ((platforms[i, j] == true) && ((j == NBR_PLATFORM - 1) || ((j < NBR_PLATFORM - 1) && (Surrounded(1, new Point(i, j))))))
+                }
+                for (int j = 0; j < NBR_PLATFORM; j++)
+                {
+                    for (int i = 0; i < NBR_PLATFORM; i++)
                     {
-                        this.decorsInRoom.Add(new Decor(j, i, 1, 0));
+                        if ((platforms[i, j] == true) && ((j < NBR_PLATFORM - 1) && (Surrounded(2, new Point(i, j)))))
+                        {
+                            this.decorsInRoom.Add(new Decor(j, i, 1, 0));
+                            switch (rdm.Next(0, 2))
+                            {
+                                case 0:
+                                    if (i > 0)
+                                    {
+                                        platforms[i - 1, j + 1] = true;
+                                    }
+                                    else
+                                    {
+                                        platforms[i + 1, j + 1] = true;
+                                    }
+                                    break;
+                                case 1:
+                                    if (i > 0)
+                                    {
+                                        platforms[i - 1, j] = true;
+                                    }
+                                    else
+                                    {
+                                        platforms[i + 1, j] = true;
+                                    }
+                                    break;
+                            }
+                        }
+                        else if ((platforms[i, j] == true) && ((j == NBR_PLATFORM - 1) || ((j < NBR_PLATFORM - 1) && (Surrounded(1, new Point(i, j))))))
+                        {
+                            this.decorsInRoom.Add(new Decor(j, i, 1, 0));
+                        }
                     }
                 }
+
             }
         }
 
@@ -146,15 +160,61 @@ namespace NaOn
 
         //faire aparaitre aleatoirement des plateformes
 
-        public void AddDoor(int whichDoor)
-        {
-            this.doors.Add(whichDoor);
-        }
-
         public void RemoveWall(int whichWall)   //0 = up, 1 = right, 2 = down, 3 = left
         {
-            this.AddDoor(whichWall);
+            this.doors.Add(whichWall);
             this.visited = true;
+        }
+
+        public void AddDoors()
+        {
+            List<int> listOfChoices = new List<int>();
+            Random choice = new Random();
+            foreach (int door in doors)
+            {
+                switch (door)   //0 = up, 1 = right, 2 = down, 3 = left
+                {
+                    case 0:
+                        for (int i = 0; i < NBR_PLATFORM; i++)
+                        {
+                            if (platforms[i, 2] == true)
+                            {
+                                listOfChoices.Add(i);
+                            }
+                        }
+                        this.decorsInRoom.Add(new Decor(j, i, 2, 0));
+                        listOfChoices[choice.Next(0, listOfChoices.Count)];
+                        ///////creer porte => les consequences dans le code des decors/rooms
+                        break;
+                    case 1:
+                        for (int i = 0; i < NBR_PLATFORM; i++)
+                        {
+                            if (platforms[i, 3] == true)
+                            {
+
+                            }
+                        }
+                        break;
+                    case 2:
+                        for (int i = 0; i < NBR_PLATFORM; i++)
+                        {
+                            if (platforms[i, 1] == true)
+                            {
+
+                            }
+                        }
+                        break;
+                    case 3:
+                        for (int i = 0; i < NBR_PLATFORM; i++)
+                        {
+                            if (platforms[i, 0] == true)
+                            {
+
+                            }
+                        }
+                        break;
+                }
+            }
         }
     }
 }
