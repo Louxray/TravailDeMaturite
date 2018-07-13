@@ -69,7 +69,7 @@
     <Compile Include="Heros.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Object.cs">
+    <Compile Include="Item.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Program.cs" />

@@ -9,6 +9,7 @@ namespace NaOn
 {
     class Room
     {
+        private bool specialRoom = false;
         public static readonly int NBR_DOOR  = 4;
         public static readonly int NBR_PLATFORM = 4;
         private int typeOfRoom;
@@ -16,12 +17,18 @@ namespace NaOn
         public bool visited { get; private set; } = false;
         public List<int> doors = new List<int>(); //0 = up, 1 = right, 2 = down, 3 = left
         public List<Decor> decorsInRoom { get; private set; } = new List<Decor>();
+        public List<Entity> ennemiesInRoom { get; private set; } = new List<Entity>();
 
-        public Room(int[,] dimension)
+        public Room(bool specialRoomOrNot)   //je dois ajouter l argument du type de dj
+        {
+            this.specialRoom = specialRoomOrNot;
+        }
+
+        public void CreateRoom()
         {
             int[] shortest = new int[] { -10, -10, -10, -10 };
             Random rdm = new Random();
-            typeOfRoom = rdm.Next(0, 3);
+            this.typeOfRoom = rdm.Next(0, 3);
             for (int i = 0; i < 10; i++)
             {
                 for (int j = 0; j < 14; j++)
@@ -30,17 +37,18 @@ namespace NaOn
                     {
                         this.decorsInRoom.Add(new Decor(j, i, 0, 0));
                     }
-                    if ((typeOfRoom != 0) && (i == 9))
+                    if (((this.specialRoom) || (typeOfRoom != 0)) && (i == 9))
                     {
                         this.decorsInRoom.Add(new Decor(j, i, 0, 0));
-                        for (int k = 0; k <NBR_PLATFORM; k++)
+                        for (int k = 0; k < NBR_PLATFORM; k++)
                         {
-                            this.decorsInRoom.Add(new Decor(k, (k%3 == 0) ? 2 : 1, 1, 0));
+                            platforms[(k % 3 == 0) ? 2 : 1, k] = true;
+                            this.decorsInRoom.Add(new Decor(k, (k % 3 == 0) ? 2 : 1, 1, 0));
                         }
                     }
                 }
             }
-            if (typeOfRoom == 0)
+            if ((typeOfRoom == 0) && (!this.specialRoom))
             {
                 for (int j = 0; j < NBR_PLATFORM; j++)
                 {
@@ -48,17 +56,17 @@ namespace NaOn
                     {
                         if (rdm.Next(0, 2) == 0)
                         {
-                            if ((j == 0) || ((j > 0) && (Surrounded(0, new Point(i, j)))))
+                            if ((j == 0) || ((j > 0) && (this.Surrounded(0, new Point(i, j)))))
                             {
-                                platforms[i, j] = true;
+                                this.platforms[i, j] = true;
                                 shortest[j] = i;
                             }
                         }
                         if ((i == NBR_PLATFORM - 1) && (shortest[j] == -10))
                         {
-                            platforms[NBR_PLATFORM - 2, j] = true;
+                            this.platforms[NBR_PLATFORM - 2, j] = true;
                             shortest[j] = NBR_PLATFORM - 2;
-                            platforms[1, j] = true;
+                            this.platforms[1, j] = true;
                             shortest[j] = 1;
                         }
                     }
@@ -67,7 +75,7 @@ namespace NaOn
                 {
                     for (int i = 0; i < NBR_PLATFORM; i++)
                     {
-                        if ((platforms[i, j] == true) && ((j < NBR_PLATFORM - 1) && (Surrounded(2, new Point(i, j)))))
+                        if ((this.platforms[i, j] == true) && ((j < NBR_PLATFORM - 1) && (this.Surrounded(2, new Point(i, j)))))
                         {
                             this.decorsInRoom.Add(new Decor(j, i, 1, 0));
                             switch (rdm.Next(0, 2))
@@ -75,26 +83,26 @@ namespace NaOn
                                 case 0:
                                     if (i > 0)
                                     {
-                                        platforms[i - 1, j + 1] = true;
+                                        this.platforms[i - 1, j + 1] = true;
                                     }
                                     else
                                     {
-                                        platforms[i + 1, j + 1] = true;
+                                        this.platforms[i + 1, j + 1] = true;
                                     }
                                     break;
                                 case 1:
                                     if (i > 0)
                                     {
-                                        platforms[i - 1, j] = true;
+                                        this.platforms[i - 1, j] = true;
                                     }
                                     else
                                     {
-                                        platforms[i + 1, j] = true;
+                                        this.platforms[i + 1, j] = true;
                                     }
                                     break;
                             }
                         }
-                        else if ((platforms[i, j] == true) && ((j == NBR_PLATFORM - 1) || ((j < NBR_PLATFORM - 1) && (Surrounded(1, new Point(i, j))))))
+                        else if ((this.platforms[i, j] == true) && ((j == NBR_PLATFORM - 1) || ((j < NBR_PLATFORM - 1) && (this.Surrounded(1, new Point(i, j))))))
                         {
                             this.decorsInRoom.Add(new Decor(j, i, 1, 0));
                         }
@@ -102,6 +110,7 @@ namespace NaOn
                 }
 
             }
+            this.AddDoors();
         }
 
         private bool Surrounded(int whichSide, Point coord)  //0 = G autour, 1 = D autour, 2 = D cote
@@ -111,14 +120,14 @@ namespace NaOn
                 case 0:
                     if (
                         ((coord.X > 0)
-                        && ((platforms[coord.X - 1, coord.Y - 1] == true)
-                        || (platforms[coord.X - 1, coord.Y] == true)))
+                        && ((this.platforms[coord.X - 1, coord.Y - 1] == true)
+                        || (this.platforms[coord.X - 1, coord.Y] == true)))
 
-                        || (platforms[coord.X, coord.Y - 1] == true)
+                        || (this.platforms[coord.X, coord.Y - 1] == true)
                         
                         || ((coord.X < NBR_PLATFORM - 1)
-                        && ((platforms[coord.X + 1, coord.Y - 1] == true)
-                        || (platforms[coord.X + 1, coord.Y] == true)))
+                        && ((this.platforms[coord.X + 1, coord.Y - 1] == true)
+                        || (this.platforms[coord.X + 1, coord.Y] == true)))
                         )
                     {
                         return true;
@@ -127,14 +136,14 @@ namespace NaOn
                 case 1:
                     if (
                         ((coord.X > 0)
-                        && ((platforms[coord.X - 1, coord.Y + 1] == true)
-                        || (platforms[coord.X - 1, coord.Y] == true)))
+                        && ((this.platforms[coord.X - 1, coord.Y + 1] == true)
+                        || (this.platforms[coord.X - 1, coord.Y] == true)))
 
-                        || (platforms[coord.X, coord.Y + 1] == true)
+                        || (this.platforms[coord.X, coord.Y + 1] == true)
 
                         || ((coord.X < NBR_PLATFORM - 1)
-                        && ((platforms[coord.X + 1, coord.Y + 1] == true)
-                        || (platforms[coord.X + 1, coord.Y] == true)))
+                        && ((this.platforms[coord.X + 1, coord.Y + 1] == true)
+                        || (this.platforms[coord.X + 1, coord.Y] == true)))
                         )
                     {
                         return true;
@@ -143,12 +152,12 @@ namespace NaOn
                 case 2:
                     if (
                         ((coord.X > 0)
-                        && (platforms[coord.X - 1, coord.Y + 1] == true))
+                        && (this.platforms[coord.X - 1, coord.Y + 1] == true))
 
-                        || (platforms[coord.X, coord.Y + 1] == true)
+                        || (this.platforms[coord.X, coord.Y + 1] == true)
 
                         || ((coord.X < NBR_PLATFORM - 1)
-                        && (platforms[coord.X + 1, coord.Y + 1] == true))
+                        && (this.platforms[coord.X + 1, coord.Y + 1] == true))
                         )
                     {
                         return true;
@@ -170,50 +179,49 @@ namespace NaOn
         {
             List<int> listOfChoices = new List<int>();
             Random choice = new Random();
-            foreach (int door in doors)
+            foreach (int door in this.doors)
             {
+                listOfChoices.Clear();
                 switch (door)   //0 = up, 1 = right, 2 = down, 3 = left
-                {
+                {                    
                     case 0:
                         for (int i = 0; i < NBR_PLATFORM; i++)
                         {
-                            if (platforms[i, 2] == true)
+                            if (this.platforms[i, 2] == true)
                             {
                                 listOfChoices.Add(i);
                             }
                         }
-                        this.decorsInRoom.Add(new Decor(j, i, 2, 0));
-                        listOfChoices[choice.Next(0, listOfChoices.Count)];
-                        ///////creer porte => les consequences dans le code des decors/rooms
                         break;
                     case 1:
                         for (int i = 0; i < NBR_PLATFORM; i++)
                         {
-                            if (platforms[i, 3] == true)
+                            if (this.platforms[i, 3] == true)
                             {
-
+                                listOfChoices.Add(i);
                             }
                         }
                         break;
                     case 2:
                         for (int i = 0; i < NBR_PLATFORM; i++)
                         {
-                            if (platforms[i, 1] == true)
+                            if (this.platforms[i, 1] == true)
                             {
-
+                                listOfChoices.Add(i);
                             }
                         }
                         break;
                     case 3:
                         for (int i = 0; i < NBR_PLATFORM; i++)
                         {
-                            if (platforms[i, 0] == true)
+                            if (this.platforms[i, 0] == true)
                             {
-
+                                listOfChoices.Add(i);
                             }
                         }
                         break;
                 }
+                this.decorsInRoom.Add(new Decor(0, listOfChoices[choice.Next(0, listOfChoices.Count)], 2, door));
             }
         }
     }

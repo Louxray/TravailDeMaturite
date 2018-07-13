@@ -19,16 +19,22 @@ namespace NaOn
         Heros player = new Heros(); //creation personnage
         Room[,] dungeon = new Room[MAZE_HEIGHT, MAZE_WIDTH];    //creation du dj selon les dimension
         Point whichPosition = new Point(0,0);   //localisation dans le dj
-        //List<Object> allObjects;
+
         List<Entity> goodOnes = new List<Entity>();
-        List<Ennemy> ennemis = new List<Ennemy>();
+        List<Entity> ennemies = new List<Entity>();
         List<Decor> decors = new List<Decor>();
         List<Entity> everybody = new List<Entity>();
+
         int[,] visiondimension = new int[2, 2];
+
+        List<Timer> allTimers = new List<Timer>();
+        Timer cooldowns;
+        Timer movements;
 
         public Form1()
         {
             InitializeComponent();
+      
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -40,7 +46,20 @@ namespace NaOn
             player.Left = 200;
             player.Top = 200;
             Ennemy lol = new Ennemy("zombie");
-            ennemis.Add(lol);
+            ennemies.Add(lol);
+            lol.ActivateEntity();
+
+            this.cooldowns = new Timer();
+            this.cooldowns.Interval = 100;
+            this.cooldowns.Tick += this.cooldowns_Tick;
+            this.cooldowns.Enabled = true;
+            this.allTimers.Add(cooldowns);
+
+            this.movements = new Timer();
+            this.movements.Interval = 10;
+            this.movements.Tick += this.MoveEntities;
+            this.movements.Enabled = true;
+            this.allTimers.Add(movements);
 
 
             //repetorie toutes les entites
@@ -49,9 +68,9 @@ namespace NaOn
                 everybody.Add(goodOnes[i]);
             }
 
-            for (int i = 0; i < ennemis.Count; i++)
+            for (int i = 0; i < ennemies.Count; i++)
             {
-                everybody.Add(ennemis[i]);
+                everybody.Add(ennemies[i]);
             }
             
             for (int i = 0; i < everybody.Count; i++)
@@ -78,23 +97,42 @@ namespace NaOn
 
             //creation zones de decor
             CreateMaze();
-            player.Location = new Point(70, 200);
-            this.Left -= 20;
+            player.Location = new Point(70, 70);
+            player.ActivateEntity();
 
         }   
 
         private void MoveEntities(object sender, EventArgs e)
         {
-            player.MovePlayer(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom, this);    //demarre le test des touches
+            if ((Control.MouseButtons == MouseButtons.Left)
+                && ((PointToClient(System.Windows.Forms.Cursor.Position).X < -1)
+                || (PointToClient(System.Windows.Forms.Cursor.Position).X > ClientSize.Width)
+                || (PointToClient(System.Windows.Forms.Cursor.Position).Y < -1)
+                || (PointToClient(System.Windows.Forms.Cursor.Position).Y > ClientSize.Height)))
+            {
+                this.Pause();
+            }
+                player.MovePlayer(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom, this);    //demarre le test des touches
             CollisionAttack();
             for (int i = 0; i < everybody.Count; i++)
             {
                 everybody[i].Gravity(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom);
-                everybody[i].Recover();
                 if (everybody[i].TestMort(this.ClientSize.Height))
                 {
-                    Controls.Remove(everybody[i]);
-                    everybody.Remove(everybody[i]);
+                    if (everybody[i].tag == "ennemy")
+                    {
+                        Entity whoDestroy;
+                        whoDestroy = everybody[i];
+                        Controls.Remove(everybody[i]);
+                        ennemies.Remove(everybody[i]);
+                        everybody.Remove(everybody[i]);
+                        whoDestroy.Dispose();
+                        break;
+                    }
+                    if (everybody[i].tag == "player")
+                    {
+                        player.Wound(0, 25);
+                    }
                     //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     //
                     //  IL FAUT ENCORE CHANGER LE FAIT QUE SI LES GENTILS TOMBENT ILS NE MEURENT PAS
@@ -125,34 +163,34 @@ namespace NaOn
             {
                 foreach (Entity whichAlly in goodOnes)
                 {
-                    foreach (Ennemy whichEnnemi in ennemis)
+                    foreach (Ennemy whichEnnemy in ennemies)
                     {
-                        foreach (Attack whichAttack in whichEnnemi.listAttacks)
+                        foreach (Attack whichAttack in whichEnnemy.listAttacks)
                         {
-                            if (whichAttack.Enabled)
-                            {
-                                whichAttack.MoveToTarget();
-                            }
-                            if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds)))
+                            if ((whichAttack.Enabled)
+                                && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds)))
                             {
                                 whichAlly.Wound(whichAttack.typeOfDamage, whichAttack.damage);
+                                whichAttack.DesactivateAttack();
                             }
-                            if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds)))
+                            if ((whichAttack.Enabled)
+                                && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds))
+                                && (whichDecor.whichDecor == 0))
                             {
                                 whichAttack.DesactivateAttack();
                             }
                         }
                         foreach (Attack whichAttack in whichAlly.listAttacks)
                         {
-                            if (whichAttack.Enabled)
+                            if ((whichAttack.Enabled)
+                                && (whichAttack.Bounds.IntersectsWith(whichEnnemy.Bounds)))
                             {
-                                whichAttack.MoveToTarget();
+                                whichEnnemy.Wound(whichAttack.typeOfDamage, whichAttack.damage);
+                                whichAttack.DesactivateAttack();
                             }
-                            if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichEnnemi.Bounds)))
-                            {
-                                whichEnnemi.Wound(whichAttack.typeOfDamage, whichAttack.damage);
-                            }
-                            if ((whichAttack.Enabled) && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds)))
+                            if ((whichAttack.Enabled)
+                                && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds))
+                                && (whichDecor.whichDecor == 0))
                             {
                                 whichAttack.DesactivateAttack();
                             }
@@ -168,14 +206,24 @@ namespace NaOn
             List<Point> alreadyVisited = new List<Point>();
             List<int> availableRooms = new List<int>();
             Random rdm = new Random();
-            whichPosition = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
+            Point start = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
+            Point bossesRoom = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
+            whichPosition = bossesRoom;
             alreadyVisited.Add(whichPosition);
             int whichRoom = -1;
-            for (int i = 0; i<dungeon.GetUpperBound(0) + 1; i++)
+            for (int i = 0; i < dungeon.GetUpperBound(0) + 1; i++)
            {
-                for (int j = 0; j<dungeon.GetUpperBound(1) + 1; j++)
+                for (int j = 0; j < dungeon.GetUpperBound(1) + 1; j++)
                 {
-                   dungeon[i, j] = new Room(visiondimension);
+                    if (((start.Y == i) && (start.X == j))
+                        || ((bossesRoom.Y == i) && (bossesRoom.X == j)))
+                    {
+                        this.dungeon[i, j] = new Room(true);
+                    }
+                    else
+                    {
+                        this.dungeon[i, j] = new Room(false);
+                    }
                     //test[i, j] = 0;
                 }
             }
@@ -253,7 +301,7 @@ namespace NaOn
                 Debug.WriteLine("");
                 */
             }
-            whichPosition = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
+            whichPosition = start;
             EnterTheRoom();
         }
 
@@ -301,10 +349,10 @@ namespace NaOn
                     }
                     break;
                 case 4:
-                    if (((whichPosition.Y - 1 >= 0) && (!dungeon[whichPosition.Y - 1, whichPosition.X].visited))
-                        || ((whichPosition.Y + 1 <= dungeon.GetUpperBound(0)) && (!dungeon[whichPosition.Y + 1, whichPosition.X].visited))
-                        || ((whichPosition.X - 1 >= 0) && (!dungeon[whichPosition.Y, whichPosition.X - 1].visited))
-                        || ((whichPosition.X + 1 <= dungeon.GetUpperBound(1)) && (!dungeon[whichPosition.Y, whichPosition.X + 1].visited)))
+                    if ((whichPosition.Y - 1 >= 0) && (!dungeon[whichPosition.Y - 1, whichPosition.X].visited)
+                        || (whichPosition.Y + 1 <= dungeon.GetUpperBound(0)) && (!dungeon[whichPosition.Y + 1, whichPosition.X].visited)
+                        || (whichPosition.X - 1 >= 0) && (!dungeon[whichPosition.Y, whichPosition.X - 1].visited)
+                        || (whichPosition.X + 1 <= dungeon.GetUpperBound(1)) && (!dungeon[whichPosition.Y, whichPosition.X + 1].visited))
                     {
                         return false;
                     }
@@ -323,6 +371,7 @@ namespace NaOn
 
         public void EnterTheRoom()
         {
+            dungeon[whichPosition.Y, whichPosition.X].CreateRoom();
             this.Controls.AddRange(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom.ToArray());
         }
             
@@ -336,6 +385,38 @@ namespace NaOn
                 return true;
             }
             return false;
-        }    
+        }
+
+        private void Pause()
+        {
+            foreach (Timer whichTimer in allTimers)
+            {
+                whichTimer.Stop();
+            }
+            foreach (Entity who in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
+            {
+                if (who.Enabled)
+                {
+                    who.DesactivateEntity();
+                }
+            }
+            player.DesactivateEntity();
+        }
+
+        private void Unpause()
+        {
+            foreach (Timer whichTimer in allTimers)
+            {
+                whichTimer.Start();
+            }
+            foreach (Entity who in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
+            {
+                if (!who.Enabled)
+                {
+                    who.ActivateEntity();
+                }
+            }
+            player.ActivateEntity();
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace NaOn
     {
         public Ennemy(string raceGiven)
         {
-            this.tag = "ennemi";
+            this.tag = "ennemy";
             this.race = raceGiven;
             this.Image = Image.FromFile("./images/"+race+"/5.gif");
             this.Location = new Point(300, 0);

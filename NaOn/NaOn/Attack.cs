@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace NaOn
 {
-    class Attack : Object
+    class Attack : Item
     {
         //type des degats pour faiblesse/resistances
         public int typeOfDamage { get; private set; }   //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
@@ -44,13 +44,9 @@ namespace NaOn
 
         public void MoveToTarget()
         {
-            attackOrNot = (attackOrNot < 20) ? (attackOrNot+1) : (0);
-            if (attackOrNot == 0)
-            {
-                this.Location = new Point(
-                    (int)(this.Location.X + (direction[0] * this.speed)),
-                    (int)(this.Location.Y + (direction[1] * this.speed)));
-            }
+            this.Location = new Point(
+                (int)Math.Round(this.Location.X + (direction[0] * this.speed)),
+                (int)Math.Round(this.Location.Y + (direction[1] * this.speed)));
         }
 
         public void ActivateAttack(Entity who, Point aim)
@@ -83,8 +79,8 @@ namespace NaOn
                 }
             }
             this.Location = new Point(
-                (int)(who.Location.X + (who.Width - this.Width) / 2.0 + direction[0] * 20.0),
-                (int)(who.Location.Y + (who.Width - this.Width) / 2.0 + direction[1] * 20.0));
+                (int)Math.Round(who.Location.X + (who.Width - this.Width) / 2.0 + direction[0] * 20.0),
+                (int)Math.Round(who.Location.Y + (who.Width - this.Width) / 2.0 + direction[1] * 20.0));
             this.Visible = true;
             this.Enabled = true;
             this.attackOrNot = 0;

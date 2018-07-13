@@ -8,11 +8,12 @@ using System.Windows.Forms;
 
 namespace NaOn
 {
-    class Object : PictureBox
+    class Item : PictureBox
     {
-        protected string tag = null;    //tag pour reconnaitre l objet
+        public string tag { get; protected set; } = null;    //tag pour reconnaitre l objet
+        public bool interactive { get; protected set; } = false;
 
-        protected Object()
+        protected Item()
         {
             this.Anchor = (AnchorStyles.Left | AnchorStyles.Top);   //referentiel pour positionner les images
             this.Location = new Point();    //positionne l objet a 0,0 pour commencer

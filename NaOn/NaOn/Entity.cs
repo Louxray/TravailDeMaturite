@@ -8,13 +8,17 @@ using System.Windows.Forms;
 
 namespace NaOn
 {
-    class Entity : Object
+    class Entity : Item
     {
+        private Timer cooldown;
         protected Entity()
         {
-            ResetFallSpeed();   //cree l entite sans chute
-            injured = false;
-            immunity = 0;
+            this.ResetFallSpeed();   //cree l entite sans chute
+            this.injured = false;
+            this.immunity = 0;
+            this.cooldown = new Timer();
+            this.cooldown.Interval = 30;
+            this.cooldown.Tick += this.live;
         }
 
         protected bool injured;
@@ -41,32 +45,32 @@ namespace NaOn
 
         public List<Attack> listAttacks = new List<Attack>();
 
-        public void Wound(int typeOfDamage, int damage)
+        public void Wound(int typeOfDamage, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
         {
-            if (!injured)
+            if (!this.injured)
             {
                 this.health[1] -= damage;
                 this.injured = true;
-                immunity = 50;
+                this.immunity = 50;
             }
         }
 
         public void Recover()
         {
-            if (injured)
+            if (this.injured)
             {
-                immunity -= 1;
+                this.immunity -= 1;
             }
-            if (immunity == 0)
+            if (this.immunity == 0)
             {
-                injured = false;
+                this.injured = false;
             }
         }
 
         protected void CreateAttack(int typeOfDamageGiven, int damageGiven, int coutGiven, int cooldownGiven, double speedGiven, string pathOfImageGiven)
         {
             this.listAttacks.Add(new Attack(typeOfDamageGiven, damageGiven, coutGiven, cooldownGiven, speedGiven, pathOfImageGiven));
-            this.listAttacks[listAttacks.Count-1].DesactivateAttack();
+            this.listAttacks[this.listAttacks.Count-1].DesactivateAttack();
         }
 
         private void ResetFallSpeed()
@@ -76,50 +80,50 @@ namespace NaOn
 
         protected void MoveEntity(double X, List<Decor> decors)
         {
-            if (!CollisionMur(decors, X))
+            if (!this.CollisionMur(decors, X))
             {
                 if (X != 0)
                 {
                     this.direction = X;
                 }
-                this.Location = new Point(this.Left + (int)(X * moveSpeed), this.Top); //permet de deplacer le perso de X, qui est combien la quantite de deplacement de l entite 
+                this.Location = new Point(this.Left + (int)(X * this.moveSpeed), this.Top); //permet de deplacer le perso de X, qui est combien la quantite de deplacement de l entite 
             }
         }
 
         protected void Jump(List<Decor> decors)
         {
-            if ((!CollisionToit(decors)) && (CollisionSol(decors)))
+            if ((!this.CollisionToit(decors)) && (this.CollisionSol(decors)))
             {
-                this.fallSpeed = -7.5;  //vitesse d un saut 
-                Fall(); //fait tomber
+                this.fallSpeed = -7.0;  //vitesse d un saut 
+                this.Fall(); //fait tomber
             }
         }
 
         private void GravityEffect()
         {
-            this.fallSpeed = fallSpeed + acceleration;   //prise de vitesse lors de la chute
+            this.fallSpeed = this.fallSpeed + acceleration;   //prise de vitesse lors de la chute
         }
 
         public void Gravity(List<Decor> decors)
         {
-            if (!CollisionSol(decors))
+            if (!this.CollisionSol(decors))
             {
-                if ((CollisionToit(decors)) && (!CollisionMur(decors, 0)))
+                if ((this.CollisionToit(decors)) && (!this.CollisionMur(decors, 0)))
                 {
                     this.fallSpeed = 2;  //si touche le plafond le perso retombe avec une vitesse initîale de 2pixels/0.001s
                 }
-                Fall();
+                this.Fall();
             }
             else
             {
-                ResetFallSpeed();   //si touche le sol alors il tombe plus
+                this.ResetFallSpeed();   //si touche le sol alors il tombe plus
             }
         }
 
         private void Fall()
         {
-            GravityEffect(); //fait prendre de la vitesse a une entite en chute ou en saut
-            this.Location = new Point(this.Left, (int)(this.Top + fallSpeed));  //fait tomber
+            this.GravityEffect(); //fait prendre de la vitesse a une entite en chute ou en saut
+            this.Location = new Point(this.Left, (int)(this.Top + this.fallSpeed));  //fait tomber
         }
                 
         protected bool CollisionSol(List<Decor> decors)
@@ -127,8 +131,8 @@ namespace NaOn
             foreach (Decor whichObject in decors)
             {
                 //test de collision avec le decor
-                if (/*(whichObject.whichDecor == 0)  //verifie que l objet est touchable
-                    && */((this.Bottom + 7 > whichObject.Top) //test de collision
+                if ((whichObject.whichDecor < 2)  //verifie que l objet est touchable
+                    && ((this.Bottom + 7 > whichObject.Top) //test de collision
                     && (this.Bottom - 7 < whichObject.Top)
                     && (this.Left < whichObject.Right)
                     && (this.Right > whichObject.Left)))
@@ -197,7 +201,36 @@ namespace NaOn
 
         public /*virtual*/ bool TestMort(int formHeight)
         {
-            return this.health[1] <= 0 || TestTombe(formHeight) ;   //test si le perso est mort
-        }        
+            if ((this.health[1] <= 0) || (TestTombe(formHeight)))   //test si le perso est mort
+            {
+                this.DesactivateEntity();
+                return true;
+            }
+            return false;
+        }
+
+        public void ActivateEntity()
+        {
+            this.Enabled = true;
+            this.cooldown.Start();
+        }
+
+        public void DesactivateEntity()
+        {
+            this.Enabled = false;
+            this.cooldown.Stop();
+        }
+
+        private void live(Object sender, EventArgs e)
+        {           
+            this.Recover();
+            foreach (Attack whichAttack in this.listAttacks)
+            {
+                if (whichAttack.Enabled)
+                {
+                    whichAttack.MoveToTarget();
+                }
+            }
+        }
     }
 }
