@@ -9,6 +9,8 @@ namespace NaOn
 {
     class Ennemy : Entity
     {
+        private string race;
+
         public Ennemy(string raceGiven)
         {
             this.tag = "ennemy";
@@ -24,7 +26,5 @@ namespace NaOn
         }
 
         //pour les ennemis de base, il y a 2 attaques, base et a distance
-
-        private string race;
     }
 }

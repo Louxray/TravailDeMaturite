@@ -10,18 +10,30 @@ namespace NaOn
     class Room
     {
         private bool specialRoom = false;
-        public static readonly int NBR_DOOR  = 4;
+        public static readonly int NBR_DOOR = 4;
         public static readonly int NBR_PLATFORM = 4;
         private int typeOfRoom;
         private bool[,] platforms = new bool[NBR_PLATFORM, NBR_PLATFORM];
         public bool visited { get; private set; } = false;
         public List<int> doors = new List<int>(); //0 = up, 1 = right, 2 = down, 3 = left
+        public bool[,] doorsInTheRoom { get; private set; } = new bool[NBR_PLATFORM, NBR_PLATFORM];
+
         public List<Decor> decorsInRoom { get; private set; } = new List<Decor>();
         public List<Entity> ennemiesInRoom { get; private set; } = new List<Entity>();
 
         public Room(bool specialRoomOrNot)   //je dois ajouter l argument du type de dj
         {
             this.specialRoom = specialRoomOrNot;
+        }
+
+        public void Reset()
+        {
+            this.visited = false;
+        }
+
+        public void Visit()
+        {
+            this.visited = true;
         }
 
         public void CreateRoom()
@@ -111,6 +123,17 @@ namespace NaOn
 
             }
             this.AddDoors();
+            for (int i = 0; i < NBR_PLATFORM; i++)
+            {
+                for (int j = 0; j < NBR_PLATFORM; j++)
+                {
+                    if ((this.platforms[i, j]) && (!this.doorsInTheRoom[i, j]))
+                    {
+                        this.ennemiesInRoom.Add(new Ennemy("zombie"));
+                        this.ennemiesInRoom[ennemiesInRoom.Count - 1].Location = new Point((j * 215) + 67, (i * 100) + 67);
+                    }
+                }
+            }
         }
 
         private bool Surrounded(int whichSide, Point coord)  //0 = G autour, 1 = D autour, 2 = D cote
@@ -178,6 +201,8 @@ namespace NaOn
         public void AddDoors()
         {
             List<int> listOfChoices = new List<int>();
+            int whichColumn = -1;
+            int whichPlatform;
             Random choice = new Random();
             foreach (int door in this.doors)
             {
@@ -185,43 +210,49 @@ namespace NaOn
                 switch (door)   //0 = up, 1 = right, 2 = down, 3 = left
                 {                    
                     case 0:
+                        whichColumn = 2;
                         for (int i = 0; i < NBR_PLATFORM; i++)
                         {
-                            if (this.platforms[i, 2] == true)
+                            if (this.platforms[i, whichColumn] == true)
                             {
                                 listOfChoices.Add(i);
                             }
                         }
                         break;
                     case 1:
+                        whichColumn = 3;
                         for (int i = 0; i < NBR_PLATFORM; i++)
                         {
-                            if (this.platforms[i, 3] == true)
+                            if (this.platforms[i, whichColumn] == true)
                             {
                                 listOfChoices.Add(i);
                             }
                         }
                         break;
                     case 2:
+                        whichColumn = 1;
                         for (int i = 0; i < NBR_PLATFORM; i++)
                         {
-                            if (this.platforms[i, 1] == true)
+                            if (this.platforms[i, whichColumn] == true)
                             {
                                 listOfChoices.Add(i);
                             }
                         }
                         break;
                     case 3:
+                        whichColumn = 0;
                         for (int i = 0; i < NBR_PLATFORM; i++)
                         {
-                            if (this.platforms[i, 0] == true)
+                            if (this.platforms[i, whichColumn] == true)
                             {
                                 listOfChoices.Add(i);
                             }
                         }
                         break;
                 }
-                this.decorsInRoom.Add(new Decor(0, listOfChoices[choice.Next(0, listOfChoices.Count)], 2, door));
+                whichPlatform = listOfChoices[choice.Next(0, listOfChoices.Count)];
+                doorsInTheRoom[whichPlatform, whichColumn] = true;
+                this.decorsInRoom.Add(new Decor(0, whichPlatform, 2, door));
             }
         }
     }

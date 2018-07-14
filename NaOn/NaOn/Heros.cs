@@ -11,7 +11,12 @@ namespace NaOn
 {
     class Heros : Entity
     {
-        
+        private int travelling = 0;
+        public Point position { get; private set; }
+        Timer test = new Timer();
+        int i;
+        int j;
+
         public Heros()
         {            
             //initialisation des donnes de base d un heros
@@ -24,12 +29,43 @@ namespace NaOn
             this.Image = Image.FromFile("./images/heros/5.gif"); //charge l image d attente du heros
             this.tag = "player";
 
-            this.CreateAttack(1, 50, 20, 20, 15.0, "./images/attack/feu0.bmp");
+            this.CreateAttack(1, 50, 20, 20, 15.0, "./images/attack/feu0/0.bmp");
+
+            Random rdm = new Random();
+            this.position = new Point(rdm.Next(0, Form1.MAZE_WIDTH), rdm.Next(0, Form1.MAZE_HEIGHT));
+
+            this.test = new Timer();
+            this.test.Interval = 5000;
+            this.test.Tick += this.test_Tick;
+            this.test.Enabled = false;
+            i = 0;
+            j = 0;
+            position = new Point(i, j);
+        }
+
+        private void test_Tick(object sender, EventArgs e)
+        {
+            if (i == 4)
+            {
+                i = 0;
+                j += 1;
+            }
+            if (j == 4)
+            {
+                j = 0;
+            }
+            position = new Point(i, j);
+            i += 1;
         }
 
         public void MovePlayer(List<Decor> decors, Form1 whichForm)
         {
             double indic = 0;  //indicateur droite/gauche  -1 = gauche, 1 = droite
+
+            if (travelling > 0)
+            {
+                travelling -= 1;
+            }
 
             if (Keyboard.IsKeyDown(Key.Space) == true) //test pour sauter
             {
@@ -40,9 +76,21 @@ namespace NaOn
             {
                 foreach (Decor whichDecor in decors)
                 {
-                    if ((whichDecor.Bounds.IntersectsWith(this.Bounds)) && (whichDecor.interactive))
+                    if ((whichDecor.Bounds.IntersectsWith(this.Bounds)) && (whichDecor.interactive)
+                        && (whichForm.Controls.Contains(whichDecor)))
                     {
-                        this.Interact();
+                        switch (whichDecor.whichDecor)
+                        {
+                            case 2:
+                                if (travelling == 0)
+                                {
+                                    this.OpenDoor(whichDecor.typeOfDecor);
+                                    travelling = 50;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
@@ -89,8 +137,23 @@ namespace NaOn
         }
         */
 
-        private void Interact()
-        {            
+        private void OpenDoor(int whichDoor)
+        {
+            switch (whichDoor)
+            {
+                case 0:
+                    this.position = new Point(this.position.X, this.position.Y - 1);
+                    break;
+                case 1:
+                    this.position = new Point(this.position.X + 1, this.position.Y);
+                    break;
+                case 2:
+                    this.position = new Point(this.position.X, this.position.Y + 1);
+                    break;
+                case 3:
+                    this.position = new Point(this.position.X - 1, this.position.Y);
+                    break;
+            }
         }
     }
 }

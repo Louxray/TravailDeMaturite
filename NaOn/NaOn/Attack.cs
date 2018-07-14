@@ -20,7 +20,6 @@ namespace NaOn
         private string pathOfImage;
         private Point target;
         private double[] direction;
-        private int attackOrNot;
 
         public Attack(int typeOfDamageGiven, int damageGiven, int coutGiven, int cooldownGiven, double speedGiven, string pathOfImageGiven)
         {
@@ -83,7 +82,6 @@ namespace NaOn
                 (int)Math.Round(who.Location.Y + (who.Width - this.Width) / 2.0 + direction[1] * 20.0));
             this.Visible = true;
             this.Enabled = true;
-            this.attackOrNot = 0;
             this.timeRemainingCD = this.cooldown;
         }        
 

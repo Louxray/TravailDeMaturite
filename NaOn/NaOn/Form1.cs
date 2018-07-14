@@ -14,11 +14,11 @@ namespace NaOn
 {
     public partial class Form1 : Form
     {
-        const int MAZE_WIDTH = 4;  //largeur du donjon (=dj) (labyrinthe)
-        const int MAZE_HEIGHT = 4; //hauteur du donjon (=dj) (labyrinthe)
+        public static readonly int MAZE_WIDTH = 4;  //largeur du donjon (=dj) (labyrinthe)
+        public static readonly int MAZE_HEIGHT = 4; //hauteur du donjon (=dj) (labyrinthe)
         Heros player = new Heros(); //creation personnage
         Room[,] dungeon = new Room[MAZE_HEIGHT, MAZE_WIDTH];    //creation du dj selon les dimension
-        Point whichPosition = new Point(0,0);   //localisation dans le dj
+        Point whichPosition;   //localisation dans le dj
 
         List<Entity> goodOnes = new List<Entity>();
         List<Entity> ennemies = new List<Entity>();
@@ -30,6 +30,7 @@ namespace NaOn
         List<Timer> allTimers = new List<Timer>();
         Timer cooldowns;
         Timer movements;
+        Timer detection;
 
         public Form1()
         {
@@ -43,11 +44,7 @@ namespace NaOn
             
             //ajoute les persos ici
             goodOnes.Add(player);
-            player.Left = 200;
-            player.Top = 200;
-            Ennemy lol = new Ennemy("zombie");
-            ennemies.Add(lol);
-            lol.ActivateEntity();
+            player.ActivateEntity();
 
             this.cooldowns = new Timer();
             this.cooldowns.Interval = 100;
@@ -60,17 +57,18 @@ namespace NaOn
             this.movements.Tick += this.MoveEntities;
             this.movements.Enabled = true;
             this.allTimers.Add(movements);
+            
+            this.detection = new Timer();
+            this.detection.Interval = 30;
+            this.detection.Tick += this.Interactions;
+            this.detection.Enabled = true;
+            this.allTimers.Add(movements);
 
 
             //repetorie toutes les entites
             for (int i = 0; i < goodOnes.Count; i++)
             {
                 everybody.Add(goodOnes[i]);
-            }
-
-            for (int i = 0; i < ennemies.Count; i++)
-            {
-                everybody.Add(ennemies[i]);
             }
             
             for (int i = 0; i < everybody.Count; i++)
@@ -97,8 +95,6 @@ namespace NaOn
 
             //creation zones de decor
             CreateMaze();
-            player.Location = new Point(70, 70);
-            player.ActivateEntity();
 
         }   
 
@@ -112,7 +108,30 @@ namespace NaOn
             {
                 this.Pause();
             }
-                player.MovePlayer(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom, this);    //demarre le test des touches
+            player.MovePlayer(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom, this);    //demarre le test des touches
+            if (player.position != whichPosition)
+            {
+                int difference = 4;
+                this.GoOut();
+                if (whichPosition.X - player.position.X < 0)
+                {
+                    difference = 1;
+                }
+                if (whichPosition.X - player.position.X > 0)
+                {
+                    difference = 3;
+                }
+                if (whichPosition.Y - player.position.Y < 0)
+                {
+                    difference = 2;
+                }
+                if (whichPosition.Y - player.position.Y > 0)
+                {
+                    difference = 0;
+                }
+                whichPosition = player.position;
+                this.EnterTheRoom(difference);
+            }
             CollisionAttack();
             for (int i = 0; i < everybody.Count; i++)
             {
@@ -155,6 +174,11 @@ namespace NaOn
                     }
                 }
             }
+        }
+
+        private void Interactions(object sender, EventArgs e)
+        {
+
         }
 
         private void CollisionAttack()
@@ -206,7 +230,7 @@ namespace NaOn
             List<Point> alreadyVisited = new List<Point>();
             List<int> availableRooms = new List<int>();
             Random rdm = new Random();
-            Point start = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
+            Point start = player.position;
             Point bossesRoom = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
             whichPosition = bossesRoom;
             alreadyVisited.Add(whichPosition);
@@ -301,8 +325,15 @@ namespace NaOn
                 Debug.WriteLine("");
                 */
             }
+            for (int i = 0; i < dungeon.GetUpperBound(0) + 1; i++)
+            {
+                for (int j = 0; j < dungeon.GetUpperBound(1) + 1; j++)
+                {
+                    dungeon[i, j].Reset();
+                }
+            }
             whichPosition = start;
-            EnterTheRoom();
+            EnterTheRoom(4);
         }
 
         private bool MazeFinished()
@@ -367,14 +398,72 @@ namespace NaOn
             {
                 this.Controls.Remove(whichDecor);
             }
+            foreach (Ennemy ennemy in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
+            {
+                ennemy.DesactivateEntity();
+                this.Controls.Remove(ennemy);
+            }
         }
 
-        public void EnterTheRoom()
+        public void EnterTheRoom(int comingFrom)    //comingFrom = quelle porte le perso a pris pour rentrer dans la salle
         {
-            dungeon[whichPosition.Y, whichPosition.X].CreateRoom();
-            this.Controls.AddRange(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom.ToArray());
+            if (!dungeon[player.position.Y, player.position.X].visited)
+            {
+                dungeon[player.position.Y, player.position.X].CreateRoom();
+            }
+            dungeon[player.position.Y, player.position.X].Visit();
+            switch (comingFrom)
+            {
+                case 0:
+                    for (int i = 0; i < Room.NBR_PLATFORM; i++)
+                    {
+                        if (dungeon[player.position.Y, player.position.X].doorsInTheRoom[i, 1] == true)
+                        {
+                            player.Location = new Point(284, (i + 1) * 110);
+                        }
+                    }
+                    break;
+                case 1:
+                    for (int i = 0; i < Room.NBR_PLATFORM; i++)
+                    {
+                        if (dungeon[player.position.Y, player.position.X].doorsInTheRoom[i, 0] == true)
+                        {
+                            player.Location = new Point(67, (i + 1) * 110);
+                        }
+                    }
+                    break;
+                case 2:
+                    for (int i = 0; i < Room.NBR_PLATFORM; i++)
+                    {
+                        if (dungeon[player.position.Y, player.position.X].doorsInTheRoom[i, 2] == true)
+                        {
+                            player.Location = new Point(500, (i + 1) * 110);
+                        }
+                    }
+                    break;
+                case 3:
+                    for (int i = 0; i < Room.NBR_PLATFORM; i++)
+                    {
+                        if (dungeon[player.position.Y, player.position.X].doorsInTheRoom[i, 3] == true)
+                        {
+                            player.Location = new Point(725, (i + 1) * 110);
+                        }
+                    }
+                    break;
+                case 4: //entre au debut (centre de la salle)
+                    player.Location = new Point(this.ClientSize.Width / 2 - player.Width / 2, 300);
+                    break;
+            }
+            this.Controls.AddRange(dungeon[player.position.Y, player.position.X].decorsInRoom.ToArray());
+            this.Controls.AddRange(dungeon[player.position.Y, player.position.X].ennemiesInRoom.ToArray());
+            ennemies.AddRange(dungeon[player.position.Y, player.position.X].ennemiesInRoom.ToArray());
+            everybody.AddRange(dungeon[player.position.Y, player.position.X].ennemiesInRoom.ToArray());
+            foreach (Ennemy ennemy in dungeon[player.position.Y, player.position.X].ennemiesInRoom)
+            {
+                ennemy.ActivateEntity();
+            }
         }
-            
+
         private bool TestInGame()
         {
             if ((Control.MousePosition.X >= 0)
