@@ -10,17 +10,18 @@ namespace NaOn
 {
     class Entity : Item
     {
-        private Timer cooldown;
+        protected Timer life;
+
         protected Entity()
         {
             this.ResetFallSpeed();   //cree l entite sans chute
             this.injured = false;
             this.immunity = 0;
-            this.cooldown = new Timer();
-            this.cooldown.Interval = 30;
-            this.cooldown.Tick += this.live;
+            this.life = new Timer();
+            this.life.Interval = 50;
+            this.life.Tick += this.live;
         }
-
+        
         protected bool injured;
 
         protected int immunity;
@@ -35,8 +36,6 @@ namespace NaOn
         protected int[] mana = new int[2];   //creation d un tableau pour la mana actuelle/max
         //mana[0] = mana max
         //mana[1] = mana actuelle
-
-        protected int level;    //level pour savoir quelles competences avoir
         
         //variables pour la chute d une entite
         private const double acceleration = 0.2;    //acceleration = g
@@ -45,14 +44,9 @@ namespace NaOn
 
         public List<Attack> listAttacks = new List<Attack>();
 
-        public void Wound(int typeOfDamage, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
+        public virtual void Wound(int typeOfDamage, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
         {
-            if (!this.injured)
-            {
-                this.health[1] -= damage;
-                this.injured = true;
-                this.immunity = 50;
-            }
+            this.health[1] -= damage;
         }
 
         public void Recover()
@@ -73,21 +67,18 @@ namespace NaOn
             this.listAttacks[this.listAttacks.Count-1].DesactivateAttack();
         }
 
-        private void ResetFallSpeed()
+        public void ResetFallSpeed()
         {
             this.fallSpeed = 0.0;   //reset
         }
 
-        protected void MoveEntity(double X, List<Decor> decors)
+        protected void MoveEntity(double X)
         {
-            if (!this.CollisionMur(decors, X))
+            if (X != 0)
             {
-                if (X != 0)
-                {
-                    this.direction = X;
-                }
-                this.Location = new Point(this.Left + (int)(X * this.moveSpeed), this.Top); //permet de deplacer le perso de X, qui est combien la quantite de deplacement de l entite 
+                this.direction = X;
             }
+            this.Location = new Point(this.Left + (int)(X * this.moveSpeed), this.Top); //permet de deplacer le perso de X, qui est combien la quantite de deplacement de l entite
         }
 
         protected void Jump(List<Decor> decors)
@@ -101,7 +92,10 @@ namespace NaOn
 
         private void GravityEffect()
         {
-            this.fallSpeed = this.fallSpeed + acceleration;   //prise de vitesse lors de la chute
+            if (this.fallSpeed < 12)
+            {
+                this.fallSpeed = this.fallSpeed + acceleration;   //prise de vitesse lors de la chute
+            }
         }
 
         public void Gravity(List<Decor> decors)
@@ -164,7 +158,7 @@ namespace NaOn
             return false;
         }
 
-        private bool CollisionMur(List<Decor> decors, double direction)
+        protected bool CollisionMur(List<Decor> decors, double direction)
         {
             foreach (Decor whichObject in decors)
             {
@@ -199,7 +193,7 @@ namespace NaOn
             return false;
         }
 
-        public /*virtual*/ bool TestMort(int formHeight)
+        public virtual bool TestMort(int formHeight)
         {
             if ((this.health[1] <= 0) || (TestTombe(formHeight)))   //test si le perso est mort
             {
@@ -209,21 +203,22 @@ namespace NaOn
             return false;
         }
 
-        public void ActivateEntity()
+        public virtual void ActivateEntity()
         {
             this.Enabled = true;
-            this.cooldown.Start();
+            this.life.Start();
         }
 
-        public void DesactivateEntity()
+        public virtual void DesactivateEntity()
         {
             this.Enabled = false;
-            this.cooldown.Stop();
+            this.life.Stop();
         }
 
         private void live(Object sender, EventArgs e)
-        {           
+        {
             this.Recover();
+
             foreach (Attack whichAttack in this.listAttacks)
             {
                 if (whichAttack.Enabled)

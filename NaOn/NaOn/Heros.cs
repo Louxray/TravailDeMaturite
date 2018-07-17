@@ -13,14 +13,16 @@ namespace NaOn
     {
         private int travelling = 0;
         public Point position { get; private set; }
-        Timer test = new Timer();
-        int i;
-        int j;
+        Timer test = new Timer();   //test du labyrinthe
+        int i;  //test du labyrinthe
+        int j;  //test du labyrinthe
+
+        protected int level;    //level pour savoir quelles competences avoir
 
         public Heros()
         {            
             //initialisation des donnes de base d un heros
-            this.health[0] = 100;   //vie max = 100
+            this.health[0] = 1000;   //vie max = 100
             this.health[1] = this.health[0];    //vie actuelle = vie max
             this.mana[0] = 100; //mana max = 100
             this.mana[1] = this.mana[0];    //mana actuelle = mana max
@@ -29,18 +31,22 @@ namespace NaOn
             this.Image = Image.FromFile("./images/heros/5.gif"); //charge l image d attente du heros
             this.tag = "player";
 
-            this.CreateAttack(1, 50, 20, 20, 15.0, "./images/attack/feu0/0.bmp");
+            this.CreateAttack(1, 100, 20, 15, 15.0, "./images/attack/feu0/0.bmp");
 
             Random rdm = new Random();
             this.position = new Point(rdm.Next(0, Form1.MAZE_WIDTH), rdm.Next(0, Form1.MAZE_HEIGHT));
 
             this.test = new Timer();
             this.test.Interval = 5000;
+
+            //permet de verifier que le labyrinthe est bien un labyrinthe
+            /*
             this.test.Tick += this.test_Tick;
             this.test.Enabled = false;
             i = 0;
             j = 0;
             position = new Point(i, j);
+            */
         }
 
         private void test_Tick(object sender, EventArgs e)
@@ -56,6 +62,16 @@ namespace NaOn
             }
             position = new Point(i, j);
             i += 1;
+        }
+
+        public override void Wound(int typeOfDamage, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
+        {
+            if (!this.injured)
+            {
+                this.health[1] -= damage;
+                this.injured = true;
+                this.immunity = 20;
+            }
         }
 
         public void MovePlayer(List<Decor> decors, Form1 whichForm)
@@ -110,7 +126,7 @@ namespace NaOn
                 indic += 1;    //vers la droite
             }
 
-            if ((Control.MouseButtons == MouseButtons.Left) && (this.listAttacks[0].timeRemainingCD == 0))
+            if ((Control.MouseButtons == MouseButtons.Left) && (this.listAttacks[0].timeRemainingCD == 0) && (!this.listAttacks[0].Enabled))
             {
                 if ((whichForm.PointToClient(System.Windows.Forms.Cursor.Position).X > -1)
                     && (whichForm.PointToClient(System.Windows.Forms.Cursor.Position).X < whichForm.ClientSize.Width)
@@ -127,15 +143,16 @@ namespace NaOn
                 indic *= 1.7; //permet de courir
             }
 
-            this.MoveEntity(indic, decors);    //transmet la direction et la vitesse pour bouger le joueur
+            if (!this.CollisionMur(decors, indic))
+            {
+                this.MoveEntity(indic);    //transmet la direction et la vitesse pour bouger le joueur
+            }
         }
-
-        /*
+                
         public override bool TestMort(int formHeight)
         {
             return this.health[1] <= 0; //meurt si plus de pv
-        }
-        */
+        }        
 
         private void OpenDoor(int whichDoor)
         {

@@ -21,11 +21,11 @@ namespace NaOn
             switch (whichDecorGiven)
             {
                 case 0:
-                    this.Image = Image.FromFile("./images/decor/zombie/zone/0.bmp");    //charge le skin de test
+                    this.Image = Image.FromFile("./images/decor/zone/0.bmp");    //charge le skin de test
                     this.Location = new Point(coordX * this.Width, coordY * this.Height);   //positionne aux coordonnes voulues
                     break;
                 case 1:
-                    this.Image = Image.FromFile("./images/decor/zombie/platform/0.bmp");    //charge le skin de test
+                    this.Image = Image.FromFile("./images/decor/platform/0.bmp");    //charge le skin de test
                     this.Location = new Point(coordX * (this.Width + 135) + 60, (coordY + 1) * 120 + 70);   //positionne aux coordonnes voulues
                     break;
                 case 2:
@@ -33,20 +33,20 @@ namespace NaOn
                     switch (typeOfDecorGiven)
                     {
                         case 0:
-                            this.Image = Image.FromFile("./images/decor/zombie/door/0.bmp");    //charge le skin de test
+                            this.Image = Image.FromFile("./images/decor/door/0.bmp");    //charge le skin de test
                             this.Location = new Point(500, (coordY + 1) * 120 + 70 - this.Height);   //positionne aux coordonnes voulues
                             break;
                         case 1:
-                            this.Image = Image.FromFile("./images/decor/zombie/door/1.bmp");    //charge le skin de test
+                            this.Image = Image.FromFile("./images/decor/door/1.bmp");    //charge le skin de test
                             this.Location = new Point(780 - this.Width, (coordY + 1) * 120 + 70 - this.Height);   //positionne aux coordonnes voulues
                             break;
                         case 2:
-                            this.Image = Image.FromFile("./images/decor/zombie/door/2.bmp");    //charge le skin de test
+                            this.Image = Image.FromFile("./images/decor/door/2.bmp");    //charge le skin de test
                             this.Location = new Point(284, (coordY + 1) * 120 + 70 - this.Height);   //positionne aux coordonnes voulues
                             this.ForeGround = true;
                             break;
                         case 3:
-                            this.Image = Image.FromFile("./images/decor/zombie/door/1.bmp");    //charge le skin de test
+                            this.Image = Image.FromFile("./images/decor/door/1.bmp");    //charge le skin de test
                             this.Location = new Point(60, (coordY + 1) * 120 + 70 - this.Height);   //positionne aux coordonnes voulues
                             break;
                     }

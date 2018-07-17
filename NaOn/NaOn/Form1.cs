@@ -30,7 +30,6 @@ namespace NaOn
         List<Timer> allTimers = new List<Timer>();
         Timer cooldowns;
         Timer movements;
-        Timer detection;
 
         public Form1()
         {
@@ -56,12 +55,6 @@ namespace NaOn
             this.movements.Interval = 10;
             this.movements.Tick += this.MoveEntities;
             this.movements.Enabled = true;
-            this.allTimers.Add(movements);
-            
-            this.detection = new Timer();
-            this.detection.Interval = 30;
-            this.detection.Tick += this.Interactions;
-            this.detection.Enabled = true;
             this.allTimers.Add(movements);
 
 
@@ -106,7 +99,7 @@ namespace NaOn
                 || (PointToClient(System.Windows.Forms.Cursor.Position).Y < -1)
                 || (PointToClient(System.Windows.Forms.Cursor.Position).Y > ClientSize.Height)))
             {
-                this.Pause();
+                //this.Pause();
             }
             player.MovePlayer(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom, this);    //demarre le test des touches
             if (player.position != whichPosition)
@@ -135,30 +128,31 @@ namespace NaOn
             CollisionAttack();
             for (int i = 0; i < everybody.Count; i++)
             {
-                everybody[i].Gravity(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom);
-                if (everybody[i].TestMort(this.ClientSize.Height))
+                if (everybody[i].Enabled)
                 {
+                    everybody[i].Gravity(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom);
                     if (everybody[i].tag == "ennemy")
                     {
-                        Entity whoDestroy;
-                        whoDestroy = everybody[i];
-                        Controls.Remove(everybody[i]);
-                        ennemies.Remove(everybody[i]);
-                        everybody.Remove(everybody[i]);
-                        whoDestroy.Dispose();
-                        break;
+                        if (everybody[i].TestMort(this.ClientSize.Height))
+                        {
+                            Entity whoDestroy;
+                            whoDestroy = everybody[i];
+                            Controls.Remove(everybody[i]);
+                            ennemies.Remove(everybody[i]);
+                            everybody.Remove(everybody[i]);
+                            whoDestroy.Dispose();
+                            break;  //au cas ou je remets des instructions derriere
+                        }
                     }
-                    if (everybody[i].tag == "player")
-                    {
-                        player.Wound(0, 25);
-                    }
-                    //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    //
-                    //  IL FAUT ENCORE CHANGER LE FAIT QUE SI LES GENTILS TOMBENT ILS NE MEURENT PAS
-                    //
-                    //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 }
             }
+            if (player.TestTombe(this.ClientSize.Height))
+            {
+                player.Wound(0, 25);
+                this.EnterTheRoom(4);
+                player.ResetFallSpeed();
+            }
+            label2.Text = player.health[1].ToString();
         }
 
         private void cooldowns_Tick(object sender, EventArgs e)
@@ -176,46 +170,45 @@ namespace NaOn
             }
         }
 
-        private void Interactions(object sender, EventArgs e)
-        {
-
-        }
-
         private void CollisionAttack()
         {
             foreach (Decor whichDecor in dungeon[whichPosition.Y, whichPosition.X].decorsInRoom)
             {
+                foreach (Entity who in everybody)
+                {
+                    foreach (Attack whichAttack in who.listAttacks)
+                    {
+                        if ((whichAttack.Enabled)
+                            && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds))
+                            && (whichDecor.whichDecor == 0))
+                        {
+                            whichAttack.DesactivateAttack();
+                        }
+                    }
+
+                }
                 foreach (Entity whichAlly in goodOnes)
                 {
                     foreach (Ennemy whichEnnemy in ennemies)
                     {
+                        whichEnnemy.WhereIsTheHero(new Point(whichAlly.Location.X + whichAlly.Width / 2, whichAlly.Location.Y + whichAlly.Width / 2));
                         foreach (Attack whichAttack in whichEnnemy.listAttacks)
                         {
                             if ((whichAttack.Enabled)
-                                && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds)))
+                                && (whichAttack.Bounds.IntersectsWith(whichAlly.Bounds))
+                                && (whichAlly.Enabled))
                             {
                                 whichAlly.Wound(whichAttack.typeOfDamage, whichAttack.damage);
-                                whichAttack.DesactivateAttack();
-                            }
-                            if ((whichAttack.Enabled)
-                                && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds))
-                                && (whichDecor.whichDecor == 0))
-                            {
                                 whichAttack.DesactivateAttack();
                             }
                         }
                         foreach (Attack whichAttack in whichAlly.listAttacks)
                         {
                             if ((whichAttack.Enabled)
-                                && (whichAttack.Bounds.IntersectsWith(whichEnnemy.Bounds)))
+                                && (whichAttack.Bounds.IntersectsWith(whichEnnemy.Bounds))
+                                && (whichEnnemy.Enabled))
                             {
                                 whichEnnemy.Wound(whichAttack.typeOfDamage, whichAttack.damage);
-                                whichAttack.DesactivateAttack();
-                            }
-                            if ((whichAttack.Enabled)
-                                && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds))
-                                && (whichDecor.whichDecor == 0))
-                            {
                                 whichAttack.DesactivateAttack();
                             }
                         }
@@ -231,7 +224,11 @@ namespace NaOn
             List<int> availableRooms = new List<int>();
             Random rdm = new Random();
             Point start = player.position;
-            Point bossesRoom = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
+            Point bossesRoom;
+            do
+            {
+                bossesRoom = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
+            } while (bossesRoom == start);
             whichPosition = bossesRoom;
             alreadyVisited.Add(whichPosition);
             int whichRoom = -1;
@@ -239,10 +236,13 @@ namespace NaOn
            {
                 for (int j = 0; j < dungeon.GetUpperBound(1) + 1; j++)
                 {
-                    if (((start.Y == i) && (start.X == j))
-                        || ((bossesRoom.Y == i) && (bossesRoom.X == j)))
+                    if ((start.Y == i) && (start.X == j))
                     {
-                        this.dungeon[i, j] = new Room(true);
+                        this.dungeon[i, j] = new Room(true, true);
+                    }
+                    else if ((bossesRoom.Y == i) && (bossesRoom.X == j))
+                    {
+                        this.dungeon[i, j] = new Room(true, true);
                     }
                     else
                     {
@@ -451,11 +451,18 @@ namespace NaOn
                     }
                     break;
                 case 4: //entre au debut (centre de la salle)
-                    player.Location = new Point(this.ClientSize.Width / 2 - player.Width / 2, 300);
+                    player.Location = new Point(500, 70);
                     break;
             }
             this.Controls.AddRange(dungeon[player.position.Y, player.position.X].decorsInRoom.ToArray());
-            this.Controls.AddRange(dungeon[player.position.Y, player.position.X].ennemiesInRoom.ToArray());
+            foreach (Ennemy whichEnnemy in dungeon[player.position.Y, player.position.X].ennemiesInRoom)
+            {
+                this.Controls.Add(whichEnnemy);
+                foreach (Attack whichAttack in whichEnnemy.listAttacks)
+                {
+                    this.Controls.Add(whichAttack);
+                }
+            }
             ennemies.AddRange(dungeon[player.position.Y, player.position.X].ennemiesInRoom.ToArray());
             everybody.AddRange(dungeon[player.position.Y, player.position.X].ennemiesInRoom.ToArray());
             foreach (Ennemy ennemy in dungeon[player.position.Y, player.position.X].ennemiesInRoom)
