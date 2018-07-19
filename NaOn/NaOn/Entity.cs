@@ -18,7 +18,7 @@ namespace NaOn
             this.injured = false;
             this.immunity = 0;
             this.life = new Timer();
-            this.life.Interval = 50;
+            this.life.Interval = 30;
             this.life.Tick += this.live;
         }
         
@@ -29,13 +29,11 @@ namespace NaOn
         protected double direction = 0;
 
         //initialisation des caracteres d une entite
-        public int[] health = new int[2];   //creation d un tableau pour la vie actuelle/max
-        //vie[0] = vie max
-        //vie[1] = vie actuelle
+        public int health;
+        protected int healthMax;
 
-        protected int[] mana = new int[2];   //creation d un tableau pour la mana actuelle/max
-        //mana[0] = mana max
-        //mana[1] = mana actuelle
+        protected int mana;
+        protected int manaMax;
         
         //variables pour la chute d une entite
         private const double acceleration = 0.2;    //acceleration = g
@@ -46,7 +44,7 @@ namespace NaOn
 
         public virtual void Wound(int typeOfDamage, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
         {
-            this.health[1] -= damage;
+            this.health -= damage;
         }
 
         public void Recover()
@@ -180,9 +178,6 @@ namespace NaOn
             }
             return false;
         }
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ////////ULTRA IMPORTANT             this.Bounds.IntersectsWith(whichObject.Bounds)
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public bool TestTombe(int formHeight)
         {
@@ -195,7 +190,7 @@ namespace NaOn
 
         public virtual bool TestMort(int formHeight)
         {
-            if ((this.health[1] <= 0) || (TestTombe(formHeight)))   //test si le perso est mort
+            if ((this.health <= 0) || (TestTombe(formHeight)))   //test si le perso est mort
             {
                 this.DesactivateEntity();
                 return true;
@@ -205,13 +200,11 @@ namespace NaOn
 
         public virtual void ActivateEntity()
         {
-            this.Enabled = true;
             this.life.Start();
         }
 
         public virtual void DesactivateEntity()
         {
-            this.Enabled = false;
             this.life.Stop();
         }
 

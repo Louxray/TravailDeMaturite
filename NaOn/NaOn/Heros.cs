@@ -12,6 +12,7 @@ namespace NaOn
     class Heros : Entity
     {
         private int travelling = 0;
+        public Point positionStart { get; private set; }
         public Point position { get; private set; }
         Timer test = new Timer();   //test du labyrinthe
         int i;  //test du labyrinthe
@@ -22,10 +23,10 @@ namespace NaOn
         public Heros()
         {            
             //initialisation des donnes de base d un heros
-            this.health[0] = 1000;   //vie max = 100
-            this.health[1] = this.health[0];    //vie actuelle = vie max
-            this.mana[0] = 100; //mana max = 100
-            this.mana[1] = this.mana[0];    //mana actuelle = mana max
+            this.healthMax = 1000;   //vie max = 100
+            this.health = this.healthMax;    //vie actuelle = vie max
+            this.manaMax = 100; //mana max = 100
+            this.mana = this.manaMax;    //mana actuelle = mana max
             
             this.moveSpeed = 3; //vitesse du heros ([v] = pixel/0.01sec)
             this.Image = Image.FromFile("./images/heros/5.gif"); //charge l image d attente du heros
@@ -35,6 +36,7 @@ namespace NaOn
 
             Random rdm = new Random();
             this.position = new Point(rdm.Next(0, Form1.MAZE_WIDTH), rdm.Next(0, Form1.MAZE_HEIGHT));
+            this.positionStart = this.position;
 
             this.test = new Timer();
             this.test.Interval = 5000;
@@ -68,9 +70,9 @@ namespace NaOn
         {
             if (!this.injured)
             {
-                this.health[1] -= damage;
+                this.health -= damage;
                 this.injured = true;
-                this.immunity = 20;
+                this.immunity = 12;
             }
         }
 
@@ -139,7 +141,6 @@ namespace NaOn
 
             if ((Keyboard.IsKeyDown(Key.LeftShift) == true))
             {
-
                 indic *= 1.7; //permet de courir
             }
 
@@ -151,7 +152,7 @@ namespace NaOn
                 
         public override bool TestMort(int formHeight)
         {
-            return this.health[1] <= 0; //meurt si plus de pv
+            return this.health <= 0; //meurt si plus de pv
         }        
 
         private void OpenDoor(int whichDoor)

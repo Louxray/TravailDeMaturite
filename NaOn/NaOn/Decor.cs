@@ -18,7 +18,9 @@ namespace NaOn
         public Decor(int coordX, int coordY, int whichDecorGiven, int typeOfDecorGiven)
         {
             this.tag = "decor";
-            switch (whichDecorGiven)
+            this.whichDecor = whichDecorGiven;
+            this.typeOfDecor = typeOfDecorGiven;
+            switch (whichDecor)
             {
                 case 0:
                     this.Image = Image.FromFile("./images/decor/zone/0.bmp");    //charge le skin de test
@@ -52,8 +54,6 @@ namespace NaOn
                     }
                     break;
             }
-            this.typeOfDecor = typeOfDecorGiven;
-            this.whichDecor = whichDecorGiven;
             this.keepForeGround.Tick += this.keepForeGround_Tick;
             this.keepForeGround.Interval = 10;
             this.keepForeGround.Enabled = true;

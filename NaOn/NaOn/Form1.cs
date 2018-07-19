@@ -19,50 +19,72 @@ namespace NaOn
         Heros player = new Heros(); //creation personnage
         Room[,] dungeon = new Room[MAZE_HEIGHT, MAZE_WIDTH];    //creation du dj selon les dimension
         Point whichPosition;   //localisation dans le dj
+        bool bossAlive;
+
+        string etat = "inTheMenu";
+        //  etat a plusieurs choix:
+        //  -inGame lorsque le jeu tourne
+        //  -pause lorsque le jeu est en pause
+        //  -inTheMenu lorsque que l on a pas encore commence a joue
+
+        //boutons pour les menus
+        List<PictureBox> allMenuBox = new List<PictureBox>();
+        PictureBox enter = new PictureBox();
+        PictureBox rules = new PictureBox();
+        PictureBox unPause = new PictureBox();
+        PictureBox exit = new PictureBox();
+        PictureBox terminate = new PictureBox();
+        PictureBox background = new PictureBox();
 
         List<Entity> goodOnes = new List<Entity>();
         List<Entity> ennemies = new List<Entity>();
         List<Decor> decors = new List<Decor>();
         List<Entity> everybody = new List<Entity>();
 
-        int[,] visiondimension = new int[2, 2];
-
         List<Timer> allTimers = new List<Timer>();
         Timer cooldowns;
         Timer movements;
 
+        Timer backgroundInTheBackground;    //timer a part pour garder le fond derriere
+
         public Form1()
         {
-            InitializeComponent();
-      
+            InitializeComponent();      
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             DoubleBuffered = true;
-            
+
             //ajoute les persos ici
             goodOnes.Add(player);
-            player.ActivateEntity();
 
             this.cooldowns = new Timer();
             this.cooldowns.Interval = 100;
             this.cooldowns.Tick += this.cooldowns_Tick;
-            this.cooldowns.Enabled = true;
+            this.cooldowns.Enabled = false;
             this.allTimers.Add(cooldowns);
 
             this.movements = new Timer();
             this.movements.Interval = 10;
             this.movements.Tick += this.MoveEntities;
-            this.movements.Enabled = true;
+            this.movements.Enabled = false;
             this.allTimers.Add(movements);
 
+            this.backgroundInTheBackground = new Timer();
+            this.backgroundInTheBackground.Interval = 10;
+            this.backgroundInTheBackground.Tick += this.backgroundInTheBackground_Tick;
+            this.backgroundInTheBackground.Enabled = true;
+            this.allTimers.Add(backgroundInTheBackground);
 
             //repetorie toutes les entites
             for (int i = 0; i < goodOnes.Count; i++)
             {
                 everybody.Add(goodOnes[i]);
             }
+
+            /*
+            feature pour le jeu complet (Travail de maturité)
             
             for (int i = 0; i < everybody.Count; i++)
             {
@@ -72,34 +94,85 @@ namespace NaOn
                     this.Controls.Add(whatAdd);
                 }
             }
+            */
 
             //parametres de base de la fenetre
-
-
             this.ClientSize = new Size((int)(840), (int)(600));
-            Size visiondimension = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2));
-            //this.ClientSize = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 1.5));
-            this.Location = new Point((int)((Screen.PrimaryScreen.Bounds.Width - this.ClientSize.Width) / 2), (int)((Screen.PrimaryScreen.Bounds.Height - this.ClientSize.Height) / 2));    //position de la fenetre sur l ecran
+            Size visiondimension = new Size((int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2.0));
+            this.Location = new Point((int)((Screen.PrimaryScreen.Bounds.Width - this.ClientSize.Width) / 2.0), (int)((Screen.PrimaryScreen.Bounds.Height - this.ClientSize.Height) / 2.0));    //position de la fenetre sur l ecran
             this.MaximumSize = this.ClientSize; //bloque la taille max de la fenetre
             this.MinimumSize = this.ClientSize; //bloque la taille min de la fenetre
             this.MaximizeBox = false;   //empeche le plein ecran
+
+            //definition des boutons des jeux
+            Bitmap bmp; //bitmap pour rendre transparent les images
             
-            //visiondimension =  { { (int)(Screen.PrimaryScreen.Bounds.Width / 6), (int)(Screen.PrimaryScreen.Bounds.Height / 4) }, { (int)(Screen.PrimaryScreen.Bounds.Width / 1.5), (int)(Screen.PrimaryScreen.Bounds.Height / 2) } };
+            this.Controls.Add(background);    //ajoute aux controles
+            this.background.Image = Image.FromFile("./images/menu/background.bmp"); //charge l image
+            this.background.SizeMode = PictureBoxSizeMode.AutoSize;    //autosize
+            this.background.Enabled = true;   //rend fonctionnel
+            this.background.Visible = true;   //rend invisible
+            this.background.Location = new Point(0, 0);
+            
+            SetPictureBox(enter, "./images/menu/enter.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 3));
+            this.enter.Click += Enter_Click;
+            
+            SetPictureBox(rules, "./images/menu/rules.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2));
+            this.rules.Click += Rules_Click;
+            
+            SetPictureBox(unPause, "./images/menu/unPause.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 3));
+            this.unPause.Click += UnPause_Click;
+            
+            SetPictureBox(exit, "./images/menu/exit.bmp", new Point(this.ClientSize.Width - 120, 100));
+            this.exit.Click += Exit_Click;
+            
+            SetPictureBox(terminate, "./images/menu/terminate.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height * 2 / 3));
+            this.terminate.Click += Terminate_Click;
 
-            //creation zones de decor
-            CreateMaze();
+            allMenuBox.Add(enter);
+            allMenuBox.Add(rules);
+            allMenuBox.Add(unPause);
+            allMenuBox.Add(exit);
+            allMenuBox.Add(terminate);
 
-        }   
+            EnterTheMenu();
+        }
+
+        private void Terminate_Click(object sender, EventArgs e)
+        {
+            Environment.Exit(1);
+        }
+
+        private void Exit_Click(object sender, EventArgs e)
+        {
+            EnterTheMenu();
+        }
+
+        private void UnPause_Click(object sender, EventArgs e)
+        {
+            Unpause();
+        }
+
+        private void Rules_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Enter_Click(object sender, EventArgs e)
+        {
+            EnterTheGame();
+        }
 
         private void MoveEntities(object sender, EventArgs e)
         {
-            if ((Control.MouseButtons == MouseButtons.Left)
+            if (((Control.MouseButtons == MouseButtons.Left)
                 && ((PointToClient(System.Windows.Forms.Cursor.Position).X < -1)
                 || (PointToClient(System.Windows.Forms.Cursor.Position).X > ClientSize.Width)
                 || (PointToClient(System.Windows.Forms.Cursor.Position).Y < -1)
                 || (PointToClient(System.Windows.Forms.Cursor.Position).Y > ClientSize.Height)))
+                || (Keyboard.IsKeyDown(Key.Escape) == true))
             {
-                //this.Pause();
+                this.Pause();
             }
             player.MovePlayer(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom, this);    //demarre le test des touches
             if (player.position != whichPosition)
@@ -125,6 +198,10 @@ namespace NaOn
                 whichPosition = player.position;
                 this.EnterTheRoom(difference);
             }
+            if (dungeon[player.position.Y,player.position.X].ennemiesInRoom.Count > 0)
+            {
+                hideDoors();
+            }
             CollisionAttack();
             for (int i = 0; i < everybody.Count; i++)
             {
@@ -139,8 +216,17 @@ namespace NaOn
                             whoDestroy = everybody[i];
                             Controls.Remove(everybody[i]);
                             ennemies.Remove(everybody[i]);
+                            dungeon[player.position.Y, player.position.X].ennemiesInRoom.Remove(everybody[i]);
                             everybody.Remove(everybody[i]);
                             whoDestroy.Dispose();
+                            if (dungeon[player.position.Y, player.position.X].ennemiesInRoom.Count == 0)
+                            {
+                                showDoors();
+                                if ((dungeon[player.position.Y, player.position.X].specialRoom) && (new Point(player.position.Y, player.position.X) != player.positionStart))
+                                {
+                                    bossAlive = false;
+                                }
+                            }
                             break;  //au cas ou je remets des instructions derriere
                         }
                     }
@@ -152,7 +238,11 @@ namespace NaOn
                 this.EnterTheRoom(4);
                 player.ResetFallSpeed();
             }
-            label2.Text = player.health[1].ToString();
+            label2.Text = player.health.ToString();
+            if (!bossAlive)
+            {
+                ActivatePictureBox(exit);
+            }
         }
 
         private void cooldowns_Tick(object sender, EventArgs e)
@@ -170,6 +260,11 @@ namespace NaOn
             }
         }
 
+        private void backgroundInTheBackground_Tick(object sender, EventArgs e)
+        {
+            this.background.SendToBack();
+        }
+
         private void CollisionAttack()
         {
             foreach (Decor whichDecor in dungeon[whichPosition.Y, whichPosition.X].decorsInRoom)
@@ -179,8 +274,12 @@ namespace NaOn
                     foreach (Attack whichAttack in who.listAttacks)
                     {
                         if ((whichAttack.Enabled)
-                            && (whichAttack.Bounds.IntersectsWith(whichDecor.Bounds))
-                            && (whichDecor.whichDecor == 0))
+                            && ((whichDecor.whichDecor == 0)
+                            && ((whichAttack.Bounds.IntersectsWith(whichDecor.Bounds)
+                            || (whichAttack.Location.X < 0)
+                            || (whichAttack.Location.X > this.ClientSize.Width)
+                            || (whichAttack.Location.Y < 0)
+                            || (whichAttack.Location.Y > this.ClientSize.Height)))))
                         {
                             whichAttack.DesactivateAttack();
                         }
@@ -217,8 +316,18 @@ namespace NaOn
             }
         }
 
+        //dans cette fonction, les commentaires servent a comprendre comment le labyrinthe est fait, pour le debug et pour les profs
         private void CreateMaze()
         {
+            for (int i = 0; i < everybody.Count; i++)
+            {
+                this.Controls.Add(everybody[i]);    //ajoute tout le monde aux controles
+                foreach (Attack whatAdd in everybody[i].listAttacks)
+                {
+                    this.Controls.Add(whatAdd);
+                }
+            }
+            this.player.ActivateEntity();
             //int[,] test = new int[MAZE_HEIGHT, MAZE_WIDTH];
             List<Point> alreadyVisited = new List<Point>();
             List<int> availableRooms = new List<int>();
@@ -334,6 +443,7 @@ namespace NaOn
             }
             whichPosition = start;
             EnterTheRoom(4);
+            bossAlive = true;
         }
 
         private bool MazeFinished()
@@ -392,6 +502,28 @@ namespace NaOn
             return true;
         }
 
+        public void hideDoors()
+        {
+            foreach (Decor whichDecor in dungeon[player.position.Y, player.position.X].decorsInRoom)
+            {
+                if (whichDecor.whichDecor == 2)
+                {
+                    this.Controls.Remove(whichDecor);
+                }
+            }
+        }
+
+        public void showDoors()
+        {
+            foreach (Decor whichDecor in dungeon[player.position.Y, player.position.X].decorsInRoom)
+            {
+                if (whichDecor.whichDecor == 2)
+                {
+                    this.Controls.Add(whichDecor);
+                }
+            }
+        }
+
         public void GoOut()
         {
             foreach (Decor whichDecor in dungeon[whichPosition.Y, whichPosition.X].decorsInRoom)
@@ -407,6 +539,10 @@ namespace NaOn
 
         public void EnterTheRoom(int comingFrom)    //comingFrom = quelle porte le perso a pris pour rentrer dans la salle
         {
+            foreach (Attack whichAttack in player.listAttacks)
+            {
+                whichAttack.DesactivateAttack();
+            }
             if (!dungeon[player.position.Y, player.position.X].visited)
             {
                 dungeon[player.position.Y, player.position.X].CreateRoom();
@@ -485,10 +621,7 @@ namespace NaOn
 
         private void Pause()
         {
-            foreach (Timer whichTimer in allTimers)
-            {
-                whichTimer.Stop();
-            }
+            etat = "pause";
             foreach (Entity who in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
             {
                 if (who.Enabled)
@@ -497,10 +630,23 @@ namespace NaOn
                 }
             }
             player.DesactivateEntity();
+
+            foreach (Timer whichTimer in allTimers)
+            {
+                whichTimer.Stop();
+            }
+            foreach (PictureBox whichPictureBox in allMenuBox)
+            {
+                DesactivatePictureBox(whichPictureBox);
+            }
+            ActivatePictureBox(unPause);
+            ActivatePictureBox(rules);
+            ActivatePictureBox(exit);
         }
 
         private void Unpause()
         {
+            etat = "inGame";
             foreach (Timer whichTimer in allTimers)
             {
                 whichTimer.Start();
@@ -513,6 +659,71 @@ namespace NaOn
                 }
             }
             player.ActivateEntity();
+
+            foreach (PictureBox whichPictureBox in allMenuBox)
+            {
+                DesactivatePictureBox(whichPictureBox);
+            }
+        }
+
+        private void EnterTheMenu()
+        {
+            etat = "inTheMenu";
+
+            foreach (PictureBox whichPictureBox in allMenuBox)
+            {
+                DesactivatePictureBox(whichPictureBox);
+            }
+
+            ActivatePictureBox(enter);
+            ActivatePictureBox(rules);
+            ActivatePictureBox(terminate);
+            this.background.Image = Image.FromFile("./images/menu/background.bmp"); //charge l image
+        }
+
+        private void EnterTheGame()
+        {
+            etat = "inGame";
+
+            foreach (PictureBox whichPictureBox in allMenuBox)
+            {
+                DesactivatePictureBox(whichPictureBox);
+            }
+
+            this.background.Image = Image.FromFile("./images/menu/cave.bmp"); //charge l image
+
+            foreach (Timer whichTimer in allTimers)
+            {
+                whichTimer.Start();
+            }
+
+            //creation labyrinthe
+            CreateMaze();
+        }
+
+        private void SetPictureBox(PictureBox whichPictureBox, string path, Point where)
+        {
+            Bitmap bmp;
+            this.Controls.Add(whichPictureBox);
+            whichPictureBox.Image = Image.FromFile(path);
+            whichPictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+            whichPictureBox.Location = new Point(where.X - whichPictureBox.Width / 2, where.Y - whichPictureBox.Height / 2);
+            DesactivatePictureBox(whichPictureBox);
+            bmp = new Bitmap(whichPictureBox.Image);
+            bmp.MakeTransparent();
+            whichPictureBox.Image = bmp;
+        }
+
+        private void ActivatePictureBox(PictureBox whichPictureBox)
+        {
+            whichPictureBox.Enabled = true;
+            whichPictureBox.Visible = true;
+        }
+
+        private void DesactivatePictureBox(PictureBox whichPictureBox)
+        {
+            whichPictureBox.Enabled = false;
+            whichPictureBox.Visible = false;
         }
     }
 }

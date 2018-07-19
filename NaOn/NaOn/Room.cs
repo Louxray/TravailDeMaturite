@@ -9,7 +9,7 @@ namespace NaOn
 {
     class Room
     {
-        private bool specialRoom = false;
+        public bool specialRoom { get; private set; } = false;
         private bool BossRoom = false;
 
         public static readonly int NBR_DOOR = 4;
