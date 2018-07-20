@@ -32,7 +32,7 @@ namespace NaOn
 
         //initialisation des caracteres d une entite
         public int health;
-        protected int healthMax;
+        public int healthMax;
 
         protected int mana;
         protected int manaMax;

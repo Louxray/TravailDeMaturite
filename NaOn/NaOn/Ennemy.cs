@@ -72,7 +72,7 @@ namespace NaOn
                     this.CreateAttack(1, 10, 20, 15, 12.0, "./images/attack/normal0/0.bmp");
                 }
                 this.phasing.Interval = 1000;
-                this.healthMax = 800;
+                this.healthMax = 1000;
             }
             //rend transparent l image
             bmp.MakeTransparent();

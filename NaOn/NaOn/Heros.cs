@@ -12,23 +12,33 @@ namespace NaOn
     class Heros : Entity
     {
         private int travelling = 0;
+        private int healing = 0;
         public Point positionStart { get; private set; }
         public Point position { get; private set; }
         Timer test = new Timer();   //test du labyrinthe
         int i;  //test du labyrinthe
         int j;  //test du labyrinthe
+        string pathOfImage;
 
-        public int level = 1;    //level pour savoir quelles competences avoir
+        //integer pour savoir l avancee du donjon
+        public int level = 0;
         public int goldInDungeon;
-        public int goldIRL;
-        public int exp;
+        public int goldIRL = 260;
         public int expInDungeon;
+
+        //inventaire
+        public bool ring0 = false;
+        public bool ring1 = false;
+        public bool ring2 = false;
+        public int potion = 0;
+
 
         public Heros()
         {            
             //initialisation des donnes de base d un heros
-            this.healthMax = 1000;   //vie max = 100
+            this.healthMax = 100;   //vie max = 100
             this.health = this.healthMax;    //vie actuelle = vie max
+            //pour le futur
             this.manaMax = 100; //mana max = 100
             this.mana = this.manaMax;    //mana actuelle = mana max
             
@@ -36,18 +46,18 @@ namespace NaOn
             this.ChangeType(0);
             this.tag = "player";
 
-            this.CreateAttack(0, 800, 20, 15, 15.0, "./images/attack/normal0/0.bmp");
+            this.typeOfDamage = 0;
+
+            this.CreateAttack(0, 1000, 20, 15, 15.0, "./images/attack/normal0/0.bmp");
             this.CreateAttack(1, 50, 20, 15, 15.0, "./images/attack/feu0/0.bmp");
             this.CreateAttack(2, 50, 20, 15, 15.0, "./images/attack/eau0/0.bmp");
             this.CreateAttack(3, 50, 20, 15, 15.0, "./images/attack/terre0/0.bmp");
 
 
+            //permet de verifier que le labyrinthe est bien un labyrinthe
             this.test = new Timer();
             this.test.Interval = 5000;
 
-            this.typeOfDamage = 0;
-
-            //permet de verifier que le labyrinthe est bien un labyrinthe
             /*
             this.test.Tick += this.test_Tick;
             this.test.Enabled = false;
@@ -59,6 +69,9 @@ namespace NaOn
 
         public void NewMaze()
         {
+            healthMax = 100 + level * 10;
+            goldInDungeon = 0;
+            this.health = healthMax;
             Random rdm = new Random();
             this.position = new Point(rdm.Next(0, Form1.MAZE_WIDTH), rdm.Next(0, Form1.MAZE_HEIGHT));
             this.positionStart = this.position;
@@ -109,25 +122,38 @@ namespace NaOn
             {
                 travelling -= 1;
             }
+            if (healing > 0)
+            {
+                healing -= 1;
+            }
 
-            if (Keyboard.IsKeyDown(Key.D1) == true)
+            if (Keyboard.IsKeyDown(Key.D1) == true) //retour a la normale
             {
                 this.ChangeType(0);
             }
 
-            if (Keyboard.IsKeyDown(Key.D2) == true)
+            if (Keyboard.IsKeyDown(Key.D2) == true) //transformation en feu
             {
-                this.ChangeType(1);
+                if (this.ring0)
+                {
+                    this.ChangeType(1);
+                }
             }
 
-            if (Keyboard.IsKeyDown(Key.D3) == true)
+            if (Keyboard.IsKeyDown(Key.D3) == true) //transformation en eau
             {
-                this.ChangeType(2);
+                if (this.ring1)
+                {
+                    this.ChangeType(2);
+                }
             }
 
-            if (Keyboard.IsKeyDown(Key.D4) == true)
+            if (Keyboard.IsKeyDown(Key.D4) == true) //transformation en terre
             {
-                this.ChangeType(3);
+                if (this.ring2)
+                {
+                    this.ChangeType(3);
+                }
             }
 
             if (Keyboard.IsKeyDown(Key.Space) == true) //test pour sauter
@@ -173,7 +199,7 @@ namespace NaOn
                 indic += 1;    //vers la droite
             }
 
-            if (Control.MouseButtons == MouseButtons.Right)
+            if (Control.MouseButtons == MouseButtons.Left)
             {
                 bool canLaunch = true;
                 foreach (Attack whichAttack in this.listAttacks)
@@ -190,6 +216,18 @@ namespace NaOn
                     && (whichForm.PointToClient(System.Windows.Forms.Cursor.Position).Y < whichForm.ClientSize.Height)))
                 {
                     this.listAttacks[typeOfDamage].ActivateAttack(this, whichForm.PointToClient(System.Windows.Forms.Cursor.Position));
+                }
+            }
+
+            if (Control.MouseButtons == MouseButtons.Right)
+            {
+                if ((this.potion > 0)
+                    && (healing == 0)
+                    && (this.health < this.healthMax))
+                {
+                    this.potion -= 1;
+                    this.health += 50;
+                    healing = 50;
                 }
             }
 
@@ -211,18 +249,19 @@ namespace NaOn
             switch (typeOfDamage)
             {
                 case 0:
-                    bmp = new Bitmap(Image.FromFile("./images/heros/normal/0.bmp")); //charge l image d attente du heros
+                    pathOfImage = "normal";
                     break;
                 case 1:
-                    bmp = new Bitmap(Image.FromFile("./images/heros/feu/0.bmp")); //charge l image d attente du heros
+                    pathOfImage = "feu";
                     break;
                 case 2:
-                    bmp = new Bitmap(Image.FromFile("./images/heros/eau/0.bmp")); //charge l image d attente du heros
+                    pathOfImage = "eau";
                     break;
                 case 3:
-                    bmp = new Bitmap(Image.FromFile("./images/heros/terre/0.bmp")); //charge l image d attente du heros
+                    pathOfImage = "terre";
                     break;
             }
+            bmp = new Bitmap(Image.FromFile("./images/heros/" + pathOfImage + "/0.bmp"));   //charge l image d attente du heros
             bmp.MakeTransparent();
             this.Image = bmp;
         }
