@@ -18,7 +18,11 @@ namespace NaOn
         int i;  //test du labyrinthe
         int j;  //test du labyrinthe
 
-        protected int level;    //level pour savoir quelles competences avoir
+        public int level = 1;    //level pour savoir quelles competences avoir
+        public int goldInDungeon;
+        public int goldIRL;
+        public int exp;
+        public int expInDungeon;
 
         public Heros()
         {            
@@ -29,17 +33,19 @@ namespace NaOn
             this.mana = this.manaMax;    //mana actuelle = mana max
             
             this.moveSpeed = 3; //vitesse du heros ([v] = pixel/0.01sec)
-            this.Image = Image.FromFile("./images/heros/5.gif"); //charge l image d attente du heros
+            this.ChangeType(0);
             this.tag = "player";
 
-            this.CreateAttack(1, 100, 20, 15, 15.0, "./images/attack/feu0/0.bmp");
+            this.CreateAttack(0, 800, 20, 15, 15.0, "./images/attack/normal0/0.bmp");
+            this.CreateAttack(1, 50, 20, 15, 15.0, "./images/attack/feu0/0.bmp");
+            this.CreateAttack(2, 50, 20, 15, 15.0, "./images/attack/eau0/0.bmp");
+            this.CreateAttack(3, 50, 20, 15, 15.0, "./images/attack/terre0/0.bmp");
 
-            Random rdm = new Random();
-            this.position = new Point(rdm.Next(0, Form1.MAZE_WIDTH), rdm.Next(0, Form1.MAZE_HEIGHT));
-            this.positionStart = this.position;
 
             this.test = new Timer();
             this.test.Interval = 5000;
+
+            this.typeOfDamage = 0;
 
             //permet de verifier que le labyrinthe est bien un labyrinthe
             /*
@@ -49,6 +55,18 @@ namespace NaOn
             j = 0;
             position = new Point(i, j);
             */
+        }
+
+        public void NewMaze()
+        {
+            Random rdm = new Random();
+            this.position = new Point(rdm.Next(0, Form1.MAZE_WIDTH), rdm.Next(0, Form1.MAZE_HEIGHT));
+            this.positionStart = this.position;
+        }
+
+        public void Conversion()
+        {
+            this.goldIRL += this.goldInDungeon;
         }
 
         private void test_Tick(object sender, EventArgs e)
@@ -66,9 +84,16 @@ namespace NaOn
             i += 1;
         }
 
-        public override void Wound(int typeOfDamage, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
+        public override void Wound(int typeOfAttack, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
         {
-            if (!this.injured)
+            bool toucheable = true;
+            if ((this.typeOfDamage != 0)
+                &&(this.typeOfDamage == typeOfAttack))
+            {
+                toucheable = false;
+            }
+            if ((!this.injured)
+                && (toucheable))
             {
                 this.health -= damage;
                 this.injured = true;
@@ -83,6 +108,26 @@ namespace NaOn
             if (travelling > 0)
             {
                 travelling -= 1;
+            }
+
+            if (Keyboard.IsKeyDown(Key.D1) == true)
+            {
+                this.ChangeType(0);
+            }
+
+            if (Keyboard.IsKeyDown(Key.D2) == true)
+            {
+                this.ChangeType(1);
+            }
+
+            if (Keyboard.IsKeyDown(Key.D3) == true)
+            {
+                this.ChangeType(2);
+            }
+
+            if (Keyboard.IsKeyDown(Key.D4) == true)
+            {
+                this.ChangeType(3);
             }
 
             if (Keyboard.IsKeyDown(Key.Space) == true) //test pour sauter
@@ -128,14 +173,23 @@ namespace NaOn
                 indic += 1;    //vers la droite
             }
 
-            if ((Control.MouseButtons == MouseButtons.Left) && (this.listAttacks[0].timeRemainingCD == 0) && (!this.listAttacks[0].Enabled))
+            if (Control.MouseButtons == MouseButtons.Right)
             {
-                if ((whichForm.PointToClient(System.Windows.Forms.Cursor.Position).X > -1)
+                bool canLaunch = true;
+                foreach (Attack whichAttack in this.listAttacks)
+                {
+                    if (whichAttack.timeRemainingCD > 0)
+                    {
+                        canLaunch = false;
+                    }
+                }
+                if ((canLaunch)
+                    && ((whichForm.PointToClient(System.Windows.Forms.Cursor.Position).X > -1)
                     && (whichForm.PointToClient(System.Windows.Forms.Cursor.Position).X < whichForm.ClientSize.Width)
                     && (whichForm.PointToClient(System.Windows.Forms.Cursor.Position).Y > -1)
-                    && (whichForm.PointToClient(System.Windows.Forms.Cursor.Position).Y < whichForm.ClientSize.Height))
+                    && (whichForm.PointToClient(System.Windows.Forms.Cursor.Position).Y < whichForm.ClientSize.Height)))
                 {
-                    this.listAttacks[0].ActivateAttack(this, whichForm.PointToClient(System.Windows.Forms.Cursor.Position));
+                    this.listAttacks[typeOfDamage].ActivateAttack(this, whichForm.PointToClient(System.Windows.Forms.Cursor.Position));
                 }
             }
 
@@ -148,6 +202,29 @@ namespace NaOn
             {
                 this.MoveEntity(indic);    //transmet la direction et la vitesse pour bouger le joueur
             }
+        }
+
+        private void ChangeType(int inWhichType)
+        {
+            Bitmap bmp = null;
+            this.typeOfDamage = inWhichType;
+            switch (typeOfDamage)
+            {
+                case 0:
+                    bmp = new Bitmap(Image.FromFile("./images/heros/normal/0.bmp")); //charge l image d attente du heros
+                    break;
+                case 1:
+                    bmp = new Bitmap(Image.FromFile("./images/heros/feu/0.bmp")); //charge l image d attente du heros
+                    break;
+                case 2:
+                    bmp = new Bitmap(Image.FromFile("./images/heros/eau/0.bmp")); //charge l image d attente du heros
+                    break;
+                case 3:
+                    bmp = new Bitmap(Image.FromFile("./images/heros/terre/0.bmp")); //charge l image d attente du heros
+                    break;
+            }
+            bmp.MakeTransparent();
+            this.Image = bmp;
         }
                 
         public override bool TestMort(int formHeight)

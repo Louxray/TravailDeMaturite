@@ -24,6 +24,8 @@ namespace NaOn
         
         protected bool injured;
 
+        protected int typeOfDamage;   //type de l entite
+
         protected int immunity;
 
         protected double direction = 0;
@@ -42,9 +44,32 @@ namespace NaOn
 
         public List<Attack> listAttacks = new List<Attack>();
 
-        public virtual void Wound(int typeOfDamage, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
+        public virtual void Wound(int typeOfAttack, int damage) //0 = normal, 1 = feu, 2 = eau, 3 = terre, 4 = vent, 5 = electricite
         {
-            this.health -= damage;
+            double multi = 1.0;//multiplicateur des degats (pour les coups tres efficaces)
+            switch (typeOfAttack)
+            {
+                case 0:
+                    if (this.typeOfDamage == 0)
+                    {
+                        multi = 1.5;
+                    }
+                    break;
+                case 1:
+                    if (this.typeOfDamage == 3)
+                    {
+                        multi = 2.0;
+                    }
+                    break;
+                default:
+                    if ((typeOfAttack - this.typeOfDamage == 1)
+                        && (typeOfAttack > 1))
+                    {
+                        multi = 2.0;
+                    }
+                    break;
+            }
+            this.health -= (int)(damage * multi);
         }
 
         public void Recover()

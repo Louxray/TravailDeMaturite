@@ -19,6 +19,7 @@ namespace NaOn
             this.Location = new Point();    //positionne l objet a 0,0 pour commencer
             this.SizeMode = PictureBoxSizeMode.AutoSize;    //autosize
             this.Visible = true;    //rend visible
+            this.BackColor = Color.Transparent;
         }
     }
 }

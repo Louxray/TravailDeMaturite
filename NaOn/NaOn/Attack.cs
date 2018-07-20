@@ -35,6 +35,10 @@ namespace NaOn
             this.direction = new System.Windows.Point(0.0,0.0);
             this.cooldown = cooldownGiven;
             this.timeRemainingCD = 0;
+
+            Bitmap bmp = new Bitmap(this.Image);
+            bmp.MakeTransparent();
+            this.Image = bmp;
         }
 
         public void Aim(Point targetGiven)

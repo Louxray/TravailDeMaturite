@@ -26,6 +26,7 @@ namespace NaOn
         //  -inGame lorsque le jeu tourne
         //  -pause lorsque le jeu est en pause
         //  -inTheMenu lorsque que l on a pas encore commence a joue
+        //  -inStore lorsque l on veut acheter
 
         //boutons pour les menus
         List<PictureBox> allMenuBox = new List<PictureBox>();
@@ -34,7 +35,15 @@ namespace NaOn
         PictureBox unPause = new PictureBox();
         PictureBox exit = new PictureBox();
         PictureBox terminate = new PictureBox();
-        PictureBox background = new PictureBox();
+        PictureBox store = new PictureBox();
+        Label goldEarned = new Label();
+        Label level = new Label();
+
+        //articles dans le store
+        PictureBox ring0 = new PictureBox();
+        PictureBox ring1 = new PictureBox();
+        PictureBox ring2 = new PictureBox();
+
 
         List<Entity> goodOnes = new List<Entity>();
         List<Entity> ennemies = new List<Entity>();
@@ -45,8 +54,6 @@ namespace NaOn
         Timer cooldowns;
         Timer movements;
 
-        Timer backgroundInTheBackground;    //timer a part pour garder le fond derriere
-
         public Form1()
         {
             InitializeComponent();      
@@ -55,6 +62,7 @@ namespace NaOn
         private void Form1_Load(object sender, EventArgs e)
         {
             DoubleBuffered = true;
+            BackgroundImageLayout = ImageLayout.None;
 
             //ajoute les persos ici
             goodOnes.Add(player);
@@ -71,11 +79,7 @@ namespace NaOn
             this.movements.Enabled = false;
             this.allTimers.Add(movements);
 
-            this.backgroundInTheBackground = new Timer();
-            this.backgroundInTheBackground.Interval = 10;
-            this.backgroundInTheBackground.Tick += this.backgroundInTheBackground_Tick;
-            this.backgroundInTheBackground.Enabled = true;
-            this.allTimers.Add(backgroundInTheBackground);
+            this.BackgroundImage = Image.FromFile("./images/menu/background.bmp");
 
             //repetorie toutes les entites
             for (int i = 0; i < goodOnes.Count; i++)
@@ -104,20 +108,11 @@ namespace NaOn
             this.MinimumSize = this.ClientSize; //bloque la taille min de la fenetre
             this.MaximizeBox = false;   //empeche le plein ecran
 
-            //definition des boutons des jeux
-            Bitmap bmp; //bitmap pour rendre transparent les images
-            
-            this.Controls.Add(background);    //ajoute aux controles
-            this.background.Image = Image.FromFile("./images/menu/background.bmp"); //charge l image
-            this.background.SizeMode = PictureBoxSizeMode.AutoSize;    //autosize
-            this.background.Enabled = true;   //rend fonctionnel
-            this.background.Visible = true;   //rend invisible
-            this.background.Location = new Point(0, 0);
-            
+            //definition des boutons des jeux/menus            
             SetPictureBox(enter, "./images/menu/enter.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 3));
             this.enter.Click += Enter_Click;
             
-            SetPictureBox(rules, "./images/menu/rules.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2));
+            SetPictureBox(rules, "./images/menu/rules.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height * 2 / 3));
             this.rules.Click += Rules_Click;
             
             SetPictureBox(unPause, "./images/menu/unPause.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 3));
@@ -125,17 +120,76 @@ namespace NaOn
             
             SetPictureBox(exit, "./images/menu/exit.bmp", new Point(this.ClientSize.Width - 120, 100));
             this.exit.Click += Exit_Click;
-            
-            SetPictureBox(terminate, "./images/menu/terminate.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height * 2 / 3));
+
+            SetPictureBox(store, "./images/menu/store.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2));
+            this.store.Click += Store_Click;
+
+            SetPictureBox(terminate, "./images/menu/terminate.bmp", new Point(this.ClientSize.Width / 2, this.ClientSize.Height * 5 / 6));
             this.terminate.Click += Terminate_Click;
+
+            //definition des articles a acheter
+            SetPictureBox(ring0, "./images/menu/ring0.bmp", new Point(this.ClientSize.Width / 3, this.ClientSize.Height / 3));
+            this.ring0.Click += Ring0_Click;
+
+            SetPictureBox(ring1, "./images/menu/ring1.bmp", new Point(this.ClientSize.Width / 3, this.ClientSize.Height / 2));
+            this.ring1.Click += Ring1_Click;
+
+            SetPictureBox(ring2, "./images/menu/ring2.bmp", new Point(this.ClientSize.Width / 3, this.ClientSize.Height * 2 / 3));
+            this.ring2.Click += Ring2_Click;
+
+
+            level.Location = new Point(720, 10);
+            SetLabel(level);
+            goldEarned.Location = new Point(720, 40);
+            SetLabel(goldEarned);
 
             allMenuBox.Add(enter);
             allMenuBox.Add(rules);
             allMenuBox.Add(unPause);
             allMenuBox.Add(exit);
             allMenuBox.Add(terminate);
+            allMenuBox.Add(store);
+            allMenuBox.Add(ring0);
+            allMenuBox.Add(ring1);
+            allMenuBox.Add(ring2);
 
             EnterTheMenu();
+        }
+
+        private void Ring0_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Ring1_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Ring2_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Store_Click(object sender, EventArgs e)
+        {
+            etat = "inStore";
+            foreach (PictureBox whichPictureBox in allMenuBox)
+            {
+                DesactivatePictureBox(whichPictureBox);
+            }
+            ActivatePictureBox(exit);
+            ActivatePictureBox(ring0);
+            ActivatePictureBox(ring1);
+            ActivatePictureBox(ring2);
+        }
+
+        private void SetLabel (Label whichLabel)
+        {
+            whichLabel.Font = new Font("Arial", 12F);
+            whichLabel.BackColor = Color.BlueViolet;
+            whichLabel.AutoSize = true;
+            Controls.Add(whichLabel);
         }
 
         private void Terminate_Click(object sender, EventArgs e)
@@ -145,6 +199,51 @@ namespace NaOn
 
         private void Exit_Click(object sender, EventArgs e)
         {
+            if (!bossAlive)
+            {
+                player.Conversion();
+            }
+            foreach (Entity who in everybody)
+            {
+                who.DesactivateEntity();
+                Controls.Remove(who);
+                foreach (Attack whatRemove in who.listAttacks)
+                {
+                    whatRemove.DesactivateAttack();
+                    this.Controls.Remove(whatRemove);
+                }
+            }
+            ennemies.Clear();
+            everybody.Clear();
+            everybody.AddRange(goodOnes);
+
+            /*
+            Entity whoDestroy;
+            this.GoOut();
+            for (int i = 0; i < everybody.Count; i++)
+            {
+                everybody[i].DesactivateEntity();
+                this.Controls.Remove(everybody[i]);    //retire tout le monde aux controles
+                if (!goodOnes.Contains(everybody[i]))
+                {
+                    whoDestroy = everybody[i];
+                    Controls.Remove(everybody[i]);
+                    ennemies.Remove(everybody[i]);
+                    everybody.Remove(everybody[i]);
+                    whoDestroy.Dispose();
+                }
+            }*/
+            for (int i = 0; i < dungeon.GetUpperBound(0) + 1; i++)
+            {
+                for (int j = 0; j < dungeon.GetUpperBound(1) + 1; j++)
+                {
+                    foreach (Decor whichDecor in dungeon[i, j].decorsInRoom)
+                    {
+                        this.Controls.Remove(whichDecor);
+                    }
+                    this.dungeon[i, j] = null;
+                }
+            }
             EnterTheMenu();
         }
 
@@ -212,6 +311,7 @@ namespace NaOn
                     {
                         if (everybody[i].TestMort(this.ClientSize.Height))
                         {
+                            player.expInDungeon += 10;   //gagne de l'exp si on tue un ennemi
                             Entity whoDestroy;
                             whoDestroy = everybody[i];
                             Controls.Remove(everybody[i]);
@@ -221,9 +321,13 @@ namespace NaOn
                             whoDestroy.Dispose();
                             if (dungeon[player.position.Y, player.position.X].ennemiesInRoom.Count == 0)
                             {
+                                player.goldInDungeon += 10;
+                                player.expInDungeon += 50;   //bonus exp si finit la salle
                                 showDoors();
-                                if ((dungeon[player.position.Y, player.position.X].specialRoom) && (new Point(player.position.Y, player.position.X) != player.positionStart))
+                                if ((dungeon[whichPosition.Y, whichPosition.X].specialRoom) && (new Point(whichPosition.X, whichPosition.Y) == player.positionStart))
                                 {
+                                    player.goldInDungeon += 30;
+                                    player.expInDungeon += 100;  //bonus exp pour tuer le boss
                                     bossAlive = false;
                                 }
                             }
@@ -234,7 +338,7 @@ namespace NaOn
             }
             if (player.TestTombe(this.ClientSize.Height))
             {
-                player.Wound(0, 25);
+                player.Wound(-1, 15);
                 this.EnterTheRoom(4);
                 player.ResetFallSpeed();
             }
@@ -243,6 +347,10 @@ namespace NaOn
             {
                 ActivatePictureBox(exit);
             }
+
+            goldEarned.Text = "argent : " + player.goldInDungeon.ToString();
+            level.Text = "exp : " + player.expInDungeon.ToString();
+
         }
 
         private void cooldowns_Tick(object sender, EventArgs e)
@@ -258,11 +366,6 @@ namespace NaOn
                     }
                 }
             }
-        }
-
-        private void backgroundInTheBackground_Tick(object sender, EventArgs e)
-        {
-            this.background.SendToBack();
         }
 
         private void CollisionAttack()
@@ -319,6 +422,7 @@ namespace NaOn
         //dans cette fonction, les commentaires servent a comprendre comment le labyrinthe est fait, pour le debug et pour les profs
         private void CreateMaze()
         {
+            bossAlive = true;
             for (int i = 0; i < everybody.Count; i++)
             {
                 this.Controls.Add(everybody[i]);    //ajoute tout le monde aux controles
@@ -328,21 +432,25 @@ namespace NaOn
                 }
             }
             this.player.ActivateEntity();
+            player.expInDungeon = 0;
+            player.goldInDungeon = 0;
+
             //int[,] test = new int[MAZE_HEIGHT, MAZE_WIDTH];
             List<Point> alreadyVisited = new List<Point>();
             List<int> availableRooms = new List<int>();
             Random rdm = new Random();
+            player.NewMaze();
             Point start = player.position;
             Point bossesRoom;
             do
             {
                 bossesRoom = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
             } while (bossesRoom == start);
-            whichPosition = bossesRoom;
+            whichPosition = new Point(rdm.Next(0, dungeon.GetUpperBound(1) + 1), rdm.Next(0, dungeon.GetUpperBound(0) + 1));
             alreadyVisited.Add(whichPosition);
             int whichRoom = -1;
             for (int i = 0; i < dungeon.GetUpperBound(0) + 1; i++)
-           {
+            {
                 for (int j = 0; j < dungeon.GetUpperBound(1) + 1; j++)
                 {
                     if ((start.Y == i) && (start.X == j))
@@ -443,7 +551,6 @@ namespace NaOn
             }
             whichPosition = start;
             EnterTheRoom(4);
-            bossAlive = true;
         }
 
         private bool MazeFinished()
@@ -539,21 +646,22 @@ namespace NaOn
 
         public void EnterTheRoom(int comingFrom)    //comingFrom = quelle porte le perso a pris pour rentrer dans la salle
         {
+            this.BackgroundImage = Image.FromFile("./images/menu/cave.bmp"); ; //charge l image de fond
             foreach (Attack whichAttack in player.listAttacks)
             {
                 whichAttack.DesactivateAttack();
             }
-            if (!dungeon[player.position.Y, player.position.X].visited)
+            if (!dungeon[whichPosition.Y, whichPosition.X].visited)
             {
-                dungeon[player.position.Y, player.position.X].CreateRoom();
+                dungeon[whichPosition.Y, whichPosition.X].CreateRoom();
             }
-            dungeon[player.position.Y, player.position.X].Visit();
+            dungeon[whichPosition.Y, whichPosition.X].Visit();
             switch (comingFrom)
             {
                 case 0:
                     for (int i = 0; i < Room.NBR_PLATFORM; i++)
                     {
-                        if (dungeon[player.position.Y, player.position.X].doorsInTheRoom[i, 1] == true)
+                        if (dungeon[whichPosition.Y, whichPosition.X].doorsInTheRoom[i, 1] == true)
                         {
                             player.Location = new Point(284, (i + 1) * 110);
                         }
@@ -562,7 +670,7 @@ namespace NaOn
                 case 1:
                     for (int i = 0; i < Room.NBR_PLATFORM; i++)
                     {
-                        if (dungeon[player.position.Y, player.position.X].doorsInTheRoom[i, 0] == true)
+                        if (dungeon[whichPosition.Y, whichPosition.X].doorsInTheRoom[i, 0] == true)
                         {
                             player.Location = new Point(67, (i + 1) * 110);
                         }
@@ -571,7 +679,7 @@ namespace NaOn
                 case 2:
                     for (int i = 0; i < Room.NBR_PLATFORM; i++)
                     {
-                        if (dungeon[player.position.Y, player.position.X].doorsInTheRoom[i, 2] == true)
+                        if (dungeon[whichPosition.Y, whichPosition.X].doorsInTheRoom[i, 2] == true)
                         {
                             player.Location = new Point(500, (i + 1) * 110);
                         }
@@ -580,7 +688,7 @@ namespace NaOn
                 case 3:
                     for (int i = 0; i < Room.NBR_PLATFORM; i++)
                     {
-                        if (dungeon[player.position.Y, player.position.X].doorsInTheRoom[i, 3] == true)
+                        if (dungeon[whichPosition.Y, whichPosition.X].doorsInTheRoom[i, 3] == true)
                         {
                             player.Location = new Point(725, (i + 1) * 110);
                         }
@@ -590,8 +698,8 @@ namespace NaOn
                     player.Location = new Point(500, 70);
                     break;
             }
-            this.Controls.AddRange(dungeon[player.position.Y, player.position.X].decorsInRoom.ToArray());
-            foreach (Ennemy whichEnnemy in dungeon[player.position.Y, player.position.X].ennemiesInRoom)
+            this.Controls.AddRange(dungeon[whichPosition.Y, whichPosition.X].decorsInRoom.ToArray());
+            foreach (Ennemy whichEnnemy in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
             {
                 this.Controls.Add(whichEnnemy);
                 foreach (Attack whichAttack in whichEnnemy.listAttacks)
@@ -599,9 +707,9 @@ namespace NaOn
                     this.Controls.Add(whichAttack);
                 }
             }
-            ennemies.AddRange(dungeon[player.position.Y, player.position.X].ennemiesInRoom.ToArray());
-            everybody.AddRange(dungeon[player.position.Y, player.position.X].ennemiesInRoom.ToArray());
-            foreach (Ennemy ennemy in dungeon[player.position.Y, player.position.X].ennemiesInRoom)
+            ennemies.AddRange(dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom.ToArray());
+            everybody.AddRange(dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom.ToArray());
+            foreach (Ennemy ennemy in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
             {
                 ennemy.ActivateEntity();
             }
@@ -624,10 +732,7 @@ namespace NaOn
             etat = "pause";
             foreach (Entity who in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
             {
-                if (who.Enabled)
-                {
-                    who.DesactivateEntity();
-                }
+                who.DesactivateEntity();
             }
             player.DesactivateEntity();
 
@@ -647,18 +752,17 @@ namespace NaOn
         private void Unpause()
         {
             etat = "inGame";
+
+            foreach (Entity who in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
+            {
+                who.ActivateEntity();
+            }
+            player.ActivateEntity();
+
             foreach (Timer whichTimer in allTimers)
             {
                 whichTimer.Start();
             }
-            foreach (Entity who in dungeon[whichPosition.Y, whichPosition.X].ennemiesInRoom)
-            {
-                if (!who.Enabled)
-                {
-                    who.ActivateEntity();
-                }
-            }
-            player.ActivateEntity();
 
             foreach (PictureBox whichPictureBox in allMenuBox)
             {
@@ -669,16 +773,24 @@ namespace NaOn
         private void EnterTheMenu()
         {
             etat = "inTheMenu";
-
             foreach (PictureBox whichPictureBox in allMenuBox)
             {
                 DesactivatePictureBox(whichPictureBox);
             }
 
+            level.Text = "niveau : " + player.level.ToString();
+            goldEarned.Text = "argent : " + player.goldIRL.ToString();
+
             ActivatePictureBox(enter);
             ActivatePictureBox(rules);
             ActivatePictureBox(terminate);
-            this.background.Image = Image.FromFile("./images/menu/background.bmp"); //charge l image
+            ActivatePictureBox(store);
+            this.BackgroundImage = Image.FromFile("./images/menu/background.bmp"); //charge l image de fond
+
+            foreach (Timer whichTimer in allTimers)
+            {
+                whichTimer.Stop();
+            }
         }
 
         private void EnterTheGame()
@@ -690,7 +802,7 @@ namespace NaOn
                 DesactivatePictureBox(whichPictureBox);
             }
 
-            this.background.Image = Image.FromFile("./images/menu/cave.bmp"); //charge l image
+            this.BackgroundImage = Image.FromFile("./images/menu/cave.bmp"); ; //charge l image de fond
 
             foreach (Timer whichTimer in allTimers)
             {
@@ -704,6 +816,7 @@ namespace NaOn
         private void SetPictureBox(PictureBox whichPictureBox, string path, Point where)
         {
             Bitmap bmp;
+            whichPictureBox.BackColor = Color.Transparent;
             this.Controls.Add(whichPictureBox);
             whichPictureBox.Image = Image.FromFile(path);
             whichPictureBox.SizeMode = PictureBoxSizeMode.AutoSize;

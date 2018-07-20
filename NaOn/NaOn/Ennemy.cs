@@ -12,7 +12,6 @@ namespace NaOn
     {
         private string race;
         private int typeOfEnnemy;   //0 = distance, 1 = melee
-        private int typeOfDamage;   //type de l ennemi
         private Timer artifialIntelligence;
         private Timer phasing;
         private bool actived = false;
@@ -22,6 +21,7 @@ namespace NaOn
 
         public Ennemy(string raceGiven, int typeOfEnnemyGiven, int typeOfDamageGiven)
         {
+            Bitmap bmp = null;
             this.tag = "ennemy";
             this.race = raceGiven;
             this.typeOfEnnemy = typeOfEnnemyGiven;
@@ -43,44 +43,45 @@ namespace NaOn
                 switch (typeOfDamage)
                 {
                     case 1:
-                        this.Image = Image.FromFile("./images/ennemies/elementalFeu/1.bmp");
-                        this.CreateAttack(1, 10, 20, 15, 13.0, "./images/attack/feu0/0.bmp");
-                        this.phasing.Interval = 2000;
+                        bmp = new Bitmap(Image.FromFile("./images/ennemies/elementalFeu/1.bmp"));
+                        this.CreateAttack(1, 15, 20, 15, 13.0, "./images/attack/feu0/0.bmp");
+                        this.phasing.Interval = 1500;
                         break;
                     case 2:
-                        this.Image = Image.FromFile("./images/ennemies/elementalEau/1.bmp");
-                        this.CreateAttack(1, 20, 20, 15, 10.0, "./images/attack/eau0/0.bmp");
-                        this.phasing.Interval = 2500;
+                        bmp = new Bitmap(Image.FromFile("./images/ennemies/elementalEau/1.bmp"));
+                        this.CreateAttack(2, 25, 20, 15, 10.0, "./images/attack/eau0/0.bmp");
+                        this.phasing.Interval = 2000;
                         break;
                     case 3:
-                        this.Image = Image.FromFile("./images/ennemies/elementalTerre/1.bmp");
-                        this.CreateAttack(1, 40, 20, 15, 7.0, "./images/attack/terre0/0.bmp");
-                        this.phasing.Interval = 3000;
+                        bmp = new Bitmap(Image.FromFile("./images/ennemies/elementalTerre/1.bmp"));
+                        this.CreateAttack(3, 35, 20, 15, 7.0, "./images/attack/terre0/0.bmp");
+                        this.phasing.Interval = 2500;
                         break;
                 }
             }
             if (typeOfEnnemy == 1)
             {
-                this.Image = Image.FromFile("./images/ennemies/" + race + "/5.gif");
+                bmp = new Bitmap(Image.FromFile("./images/ennemies/" + race + "/5.gif"));
             }
             if (typeOfEnnemy == 2)
             {
                 this.moveSpeed = 6; //vitesse du heros ([v] = pixel/0.01sec)
-                this.Image = Image.FromFile("./images/ennemies/boss/0.bmp");
+                bmp = new Bitmap(Image.FromFile("./images/ennemies/boss/0.bmp"));
                 for (int i = 0; i < 8; i++)
                 {
                     this.CreateAttack(1, 10, 20, 15, 12.0, "./images/attack/normal0/0.bmp");
                 }
                 this.phasing.Interval = 1000;
-                this.healthMax = 100;
+                this.healthMax = 800;
             }
-            
-            Bitmap bmp = new Bitmap(this.Image);
+            //rend transparent l image
             bmp.MakeTransparent();
             this.Image = bmp;
 
+            //position de base pour un ennemi
             this.Location = new Point(300, 0);
 
+            //initialise les ptnsDeVie/mana
             this.health = this.healthMax;    //vie actuelle = vie max
             this.mana = this.manaMax;    //mana actuelle = mana max
         }
@@ -108,6 +109,7 @@ namespace NaOn
                 whichAttack.DesactivateAttack();
                 whichAttack.timeRemainingCD = 0;
             }
+            actived = false;
         }
 
         private void phasing_Tick(Object sender, EventArgs e)  //selon le type d'ennemi, attaque d une certaine maniere
@@ -179,9 +181,9 @@ namespace NaOn
         {
             if (actived)
             {
-                if ((typeOfEnnemy == 0) && (this.listAttacks[0].timeRemainingCD == 0))
+                if (typeOfEnnemy == 0)
                 {
-                    this.listAttacks[0].ActivateAttack(this, aim);
+
                 }
                 if (typeOfEnnemy == 1)
                 {
